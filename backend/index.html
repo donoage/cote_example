@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+    <title>Title</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var userService = io.connect('/user');
+    </script>
+</head>
+<body>
+<div id="app">
+    <h1>User List</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Balance</th>
+        </tr>
+        <tr  v-for="user in users">
+            <td>{{ user._id }}</td>
+            <td>{{ user.balance }}</td>
+        </tr>
+    </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            users: []
+        },
+        mounted() {
+            this.listUsers();
+        },
+        methods: {
+            listUsers() {
+                this.$http.get('/user').then(res => {
+                    this.users = res.body.users;
+                }, res => {
+                    console.log(res);
+                });
+
+            }
+        }
+    });
+
+    userService.on('update', app.listUsers());
+</script>
+</body>
+</html>
