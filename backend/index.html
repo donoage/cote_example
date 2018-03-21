@@ -3,39 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ADMIN - Cote.js</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
     <link rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
-    <title>Title</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var userService = io.connect('/user');
+        var productService = io.connect('/product');
     </script>
+    <style>
+        * {
+            font-family: 'Lato', sans-serif;
+        }
+    </style>
 </head>
 <body>
-<div id="app">
-    <h1>User List</h1>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Balance</th>
-        </tr>
-        <tr  v-for="user in users">
-            <td>{{ user._id }}</td>
-            <td>{{ user.balance }}</td>
-        </tr>
-    </table>
+<div id="app" class="container is-widescreen">
+    <nav class="navbar" role="navigation" aria-label="dropdown navigation">
+        <a class="navbar-item">
+            <img src="https://bulma.io/images/bulma-logo.png" alt=""
+                 width="112" height="28">
+        </a>
+    </nav>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">
+                    Backoffice
+                </h1>
+                <h2 class="subtitle">
+                    This is control center for admins
+                </h2>
+            </div>
+        </div>
+    </section>
+    <h1 class="title"></h1>
+    <section class="tile is-ancestor">
+        <div class="tile is-vertical is-8">
+            <div class="tile">
+                <div class="tile is-parent is-vertical">
+                    <article class="tile is-child box">
+                        <p class="title">Add</p>
+                        <p class="subtitle">a Product</p>
+                        <form @submit="checkForm">
+                            <div class="field">
+                                <label class="label">Name</label>
+                                <div class="control has-icons-left has-icons-right">
+                                    <input class="input" type="text" value="" ref="newProductName">
+                                    <span class="icon is-small is-left">
+                                      <i class="fas fa-tag"></i>
+                                    </span>
+                                </div>
+                                <p class="help is-danger" v-if="errors.name.length">{{errors.name}}</p>
+                            </div>
+                            <div class="field">
+                                <label class="label">Price</label>
+                                <div class="control has-icons-left has-icons-right">
+                                    <input class="input" type="text" value="" ref="newProductPrice">
+                                    <span class="icon is-small is-left">
+                                      <i class="fas fa-dollar-sign"></i>
+                                    </span>
+                                </div>
+                                <p class="help is-danger" v-if="errors.price.length">{{errors.price}}</p>
+                            </div>
+                            <div class="field">
+                                <label class="label">Stock</label>
+                                <div class="control has-icons-left has-icons-right">
+                                    <input class="input" type="text" value="" ref="newProductStock">
+                                    <span class="icon is-small is-left">
+                                      <i class="fas fa-sort-numeric-up"></i>
+                                    </span>
+                                </div>
+                                <p class="help is-danger" v-if="errors.stock.length">{{errors.stock}}</p>
+                            </div>
+                            <div class="field">
+                                <input type="submit" value="Submit" class="button">
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                <div class="tile is-parent">
+                    <article class="tile is-child box">
+                        <p class="title">Product</p>
+                        <p class="subtitle">Catalog</p>
+                        <table class="table is-fullwidth">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Balance</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="product in products">
+                                <th>{{ product.name }}</th>
+                                <td>{{ product.price }}</td>
+                                <td>{{ product.stock }}</td>
+                                <td>
+                                    <button class="button" @click="deleteProduct(product._id)">Delete</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </article>
+                </div>
+            </div>
+            <div class="tile is-parent">
+                <article class="tile is-child box is-danger">
+                    <p class="title">User</p>
+                    <p class="subtitle">List</p>
+                    <table class="table is-fullwidth">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Balance</th>
+                            <th>Purchases</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="user in users">
+                            <th>{{ user.name }}</th>
+                            <td>{{ user.balance }}</td>
+                            <td>{{ user.purchases }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <article class="tile is-child box is-success">
+                <div class="content">
+                    <p class="title">Purchase</p>
+                    <p class="subtitle">History</p>
+                    <div class="content">
+                        <!-- Content -->
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
 <script>
-
     var app = new Vue({
         el: '#app',
         data: {
-            users: []
+            users: [],
+            products: [],
+            newProduct: {
+                name: '',
+                price: 0,
+                stock: 0,
+            },
+            errors: {
+                name: '',
+                price: '',
+                stock: '',
+            }
         },
         mounted() {
             this.listUsers();
+            this.listProducts();
         },
         methods: {
             listUsers() {
@@ -44,12 +178,63 @@
                 }, res => {
                     console.log(res);
                 });
+            },
+            listProducts() {
+                productService.emit('list', (data) =>  {
+                    this.products = data.products;
+                });
+            },
+            checkForm(e) {
+                e.preventDefault();
+                this.errors = {
+                    name: '',
+                    price: '',
+                    stock: '',
+                };
 
+                let formData = this.$refs;
+                if (formData.newProductName.value &&
+                    formData.newProductPrice.value &&
+                    formData.newProductStock.value) {
+                    this.newProduct.name = formData.newProductName.value;
+                    this.newProduct.price = formData.newProductPrice.value;
+                    this.newProduct.stock = formData.newProductStock.value;
+
+                    this.$http.post('/product', this.newProduct).then(res => {
+                        // success
+                        this.errors = {
+                            name: '',
+                            price: '',
+                            stock: '',
+                        };
+                        formData.newProductName.value = '';
+                        formData.newProductPrice.value = '';
+                        formData.newProductStock.value = '';
+                    }, res => {
+                        // error
+                       console.log(res);
+                    });
+                }
+
+                if (!formData.newProductName.value) this.errors.name = "Name required.";
+                if (!formData.newProductPrice.value) this.errors.price = "Price required.";
+                if (!formData.newProductStock.value) this.errors.stock = "Stock required.";
+            },
+            deleteProduct(productId) {
+                console.log(productId);
+                this.$http.delete(`/product/${productId}`).then(res => {
+                    // success
+                    console.log(res);
+                }, res => {
+                    // error
+                    console.log(res);
+                });
             }
         }
     });
 
-    userService.on('update', app.listUsers());
+    userService.on('update', app.listUsers);
+    productService.on('update', app.listProducts);
 </script>
 </body>
 </html>

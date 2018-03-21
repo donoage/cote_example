@@ -2,30 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>USER - Cote.js</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var userService = io.connect('/user');
+        var productService = io.connect('/product');
+        var purchaseService = io.connect('/purchase');
+    </script>
+    <style>
+        * {
+            font-family: 'Lato', sans-serif;
+        }
+    </style>
 </head>
 <body>
-    <h2>Frontend For Users</h2>
-    <div id="app-4">
-        <ol>
-            <li v-for="todo in todos">
-                {{ todo.text }}
-            </li>
-        </ol>
+<div id="app" class="container is-widescreen">
+    <nav class="navbar" role="navigation" aria-label="dropdown navigation">
+        <a class="navbar-item">
+            <img src="https://bulma.io/images/bulma-logo.png" alt=""
+                 width="112" height="28">
+        </a>
+        <div class="navbar-end">
+            <img :src="user.pic_url" alt="Image" width="64" height="64">
+            <div class="navbar-item">
+                <p>
+                    <strong>{{ user.name | capitalize}}</strong>
+                    <small>@{{ user.name | truncate }}</small>
+                    <br>
+                    Welcome Back!
+                </p>
+            </div>
+        </div>
+    </nav>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">
+                    User UI
+                </h1>
+                <h2 class="subtitle">
+                    Purchase Products
+                </h2>
+            </div>
+        </div>
+    </section>
+    <h2 class="title"></h2>
+    <h1 class="title">Products</h1>
+    <div class="columns">
+        <div class="column" v-for="product in products">
+            <div class="card">
+                <div class="card-content has-text-centered">
+                    <strong> {{ product.name }}</strong>
+                    <div class="title"></div>
+                    <div> Price: {{ product.price }}</div>
+                    <div> Stock Left: {{ product.stock }}</div>
+                    <div class="title"></div>
+                    <div class="button" @click="purchaseProduct(product._id)">Buy</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script>
-        var app4 = new Vue({
-            el: '#app-4',
-            data: {
-                todos: [
-                    { text: 'Learn JavaScript' },
-                    { text: 'Learn Vue' },
-                    { text: 'Build something awesome' }
-                ]
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            products: [],
+            user: {
+                name: '',
+                balance: 0,
+                pic_url: 0,
+            },
+        },
+        mounted() {
+            this.listProducts();
+            this.createUser();
+        },
+        filters: {
+            capitalize: function (value) {
+                if (!value) return '';
+                value = value.toString();
+                return value.charAt(0).toUpperCase() + value.slice(1)
+            },
+            truncate: function (value) {
+                if (!value) return '';
+                return value.toString().replace(/\s/g, '');
             }
-        })
-    </script>
+        },
+        methods: {
+            listProducts() {
+                productService.emit('list', (data) => {
+                    this.products = data.products;
+                });
+            },
+            createUser() {
+                this.$http.get('https://randomuser.me/api').then(res => {
+                    let firstName = res.body.results[0].name.first;
+                    let lastName = res.body.results[0].name.last;
+                    let fullName = `${firstName} ${lastName}`;
+                    let picUrl = res.body.results[0].picture.thumbnail;
+
+                    userService.emit('create', {balance: 100, name: fullName, pic_url: picUrl}, (data) => {
+                        this.user.balance = data.createUser.balance;
+                        this.user.name = data.createUser.name;
+                        this.user.pic_url = data.createUser.pic_url;
+                        this.user._id = data.createUser._id;
+                    });
+                }, res => {
+                    console.log(res);
+                });
+            },
+            purchaseProduct(productId) {
+                console.log(productId);
+                purchaseService.emit('buy', {userId: this.user._id, productId: productId}, (data) => {
+                    // this.products = data.products;
+                });
+            }
+        }
+    });
+
+    productService.on('update', app.listProducts);
+</script>
 </body>
 </html>

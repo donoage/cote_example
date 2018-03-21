@@ -9,6 +9,8 @@ let paymentResponder = new cote.Responder({
 paymentResponder.on('*', console.log);
 
 paymentResponder.on('process', function (req, cb) {
+    // - user.balance
+    // - product quantity then save.
     models.User.get(req.userId, function (err, user) {
         if (user.balance < req.price) return cb(true);
 

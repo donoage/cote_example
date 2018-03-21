@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
-
+require('pretty-error').start();
 const PORT = 5002;
 const URL = 'http://localhost';
 const MONGO_URL = 'mongodb://localhost:27017';
@@ -35,12 +35,15 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     
           type User {
             _id: String
+            name: String
             balance: Int
-            purchases: [Purchase]
+            purchases: [Purchase],
+            pic_url: String
           }
     
           type Product {
             _id: String
+            name: String
             price: Int
             stock: Int
           }
@@ -52,8 +55,9 @@ MongoClient.connect(MONGO_URL, (err, client) => {
           }
     
           type Mutation {
-            createUser(balance: Int): User
-            createProduct(price: Int, stock: Int): Product
+            createUser(balance: Int, name: String, pic_url: String): User
+            createProduct(price: Int, stock: Int, name: String): Product
+            deleteProduct(_id: String): Product
             createPurchase(userId: String, productId: String): Purchase
           }
     
@@ -72,6 +76,8 @@ MongoClient.connect(MONGO_URL, (err, client) => {
                 return (await Users.find({}).toArray()).map(prepare)
             },
             product: async (root, {_id}) => {
+                console.log("IN RESOLVER");
+                console.log(_id);
                 return prepare(await Products.findOne(ObjectId(_id)))
             },
             products: async () => {
@@ -87,12 +93,15 @@ MongoClient.connect(MONGO_URL, (err, client) => {
         Mutation: {
             createUser: async (root, args, context, info) => {
                 const res = await Users.insertOne(args);
-                console.log(res.insertedId);
                 return prepare(await Users.findOne({_id: res.insertedId}))
             },
             createProduct: async (root, args) => {
                 const res = await Products.insertOne(args);
                 return prepare(await Products.findOne({_id: res.insertedId}))
+            },
+            deleteProduct: async (root, args) => {
+                args._id = ObjectId(args._id);
+                return await Products.deleteOne(args);
             },
             createPurchase: async (root, args) => {
                 const res = await Purchases.insertOne(args);

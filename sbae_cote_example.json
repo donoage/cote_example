@@ -10,21 +10,26 @@
       "script"    : "frontend/server.js",
       "watch"     : "frontend/server.js"
     },
-    {
-      "name"      : "payment-service",
-      "script"    : "services/payment-service.js",
-      "watch"     : "services/payment-service.js"
+        {
+      "name"      : "graphql",
+      "script"    : "graphql/server.js",
+      "watch"     : "graphql/server.js"
     },
-    {
-      "name"      : "product-service",
-      "script"    : "services/product-service.js",
-      "watch"     : "services/product-service.js"
-    },
-    {
-      "name"      : "purchase-service",
-      "script"    : "services/purchase-service.js",
-      "watch"     : "services/purchase-service.js"
-    },
+    // {
+    //   "name"      : "payment-service",
+    //   "script"    : "services/payment-service.js",
+    //   "watch"     : "services/payment-service.js"
+    // },
+     {
+       "name"      : "product-service",
+       "script"    : "services/product-service.js",
+       "watch"     : "services/product-service.js"
+     },
+     {
+       "name"      : "purchase-service",
+       "script"    : "services/purchase-service.js",
+       "watch"     : "services/purchase-service.js"
+     },
     {
       "name"      : "user-service",
       "script"    : "services/user-service.js",
