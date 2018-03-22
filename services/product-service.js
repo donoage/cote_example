@@ -7,7 +7,7 @@ const fetch = createApolloFetch({
 let productResponder = new cote.Responder({
     name: 'product responder',
     namespace: 'product',
-    respondsTo: ['list']
+    respondsTo: ['list', 'create', 'get']
 });
 
 let productPublisher = new cote.Publisher({
@@ -17,6 +17,23 @@ let productPublisher = new cote.Publisher({
 });
 
 productResponder.on('*', console.log);
+
+productResponder.on('get', function (req, cb) {
+    const query = `
+            query($id: String!) {
+                product(_id: $id) {
+                    _id
+                    name
+                    price
+                    stock
+                }
+            }
+            `;
+    const variables = {id: req.productId};
+    fetch({query, variables}).then(product => {
+        cb(product.data);
+    });
+});
 
 productResponder.on('list', function (req, cb) {
     fetch({

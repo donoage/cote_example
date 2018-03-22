@@ -8,17 +8,13 @@ require('pretty-error').start();
 let userResponder = new cote.Responder({
     name: 'user responder',
     namespace: 'user',
-    respondsTo: ['create']
+    respondsTo: ['create', 'list', 'get']
 });
 
 let userPublisher = new cote.Publisher({
     name: 'user publisher',
     namespace: 'user',
     broadcasts: ['update']
-});
-
-userPublisher.on('ready', () => {
-    console.log('userpublisher ready');
 });
 
 userResponder.on('*', console.log);
@@ -65,7 +61,24 @@ userResponder.on('list', function (req, cb) {
 });
 
 userResponder.on('get', function (req, cb) {
-    // models.User.get(req.id, cb);
+    const query = `
+            query($id: String!) {
+                user(_id: $id) {
+                    _id
+                    balance
+                    name
+                    pic_url
+                    purchases {
+                        userId
+                        productId
+                    }
+                }
+            }
+            `;
+    const variables = {id: req.userId};
+    fetch({query, variables}).then(user => {
+        cb(user.data);
+    });
 });
 
 function updateUsers() {

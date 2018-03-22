@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -19,17 +21,24 @@
         * {
             font-family: 'Lato', sans-serif;
         }
+
+        img.user_img {
+            height: 64px;
+            border-radius: 50%;
+            margin-top: 4%;
+        }
     </style>
 </head>
-<body>
+<body class="animated fadeIn">
 <div id="app" class="container is-widescreen">
     <nav class="navbar" role="navigation" aria-label="dropdown navigation">
-        <a class="navbar-item">
-            <img src="https://bulma.io/images/bulma-logo.png" alt=""
-                 width="112" height="28">
-        </a>
+        <div class="logo animated jello">
+            <img src="https://static1.squarespace.com/static/59975f9a9f7456d2866ec54e/t/599c7d5b893fc0a2909944f6/1521153598582/?format=1500w"
+                 alt=""
+                 width="80">
+        </div>
         <div class="navbar-end">
-            <img :src="user.pic_url" alt="Image" width="64" height="64">
+            <img class="user_img" v-if="user.pic_url" :src="user.pic_url" alt="Image" width="64" height="64">
             <div class="navbar-item">
                 <p>
                     <strong>{{ user.name | capitalize}}</strong>
@@ -52,11 +61,15 @@
             </div>
         </div>
     </section>
-    <h2 class="title"></h2>
-    <h1 class="title">Products</h1>
-    <div class="columns">
-        <div class="column" v-for="product in products">
-            <div class="card">
+    <br>
+    <div class="notification is-danger animated fadeIn" v-if="errors">
+        <button class="delete" @click="errors=''"></button>
+        {{ errors }}
+    </div>
+    <h1 class="title">Product Catalog</h1>
+    <div class="columns is-multiline is-mobile">
+        <div class="column is-one-quarter animated pulse" v-for="product in products">
+            <div class="card ">
                 <div class="card-content has-text-centered">
                     <strong> {{ product.name }}</strong>
                     <div class="title"></div>
@@ -64,6 +77,16 @@
                     <div> Stock Left: {{ product.stock }}</div>
                     <div class="title"></div>
                     <div class="button" @click="purchaseProduct(product._id)">Buy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1 class="title">Your Products</h1>
+    <div class="columns is-multiline is-mobile">
+        <div class="column is-one-quarter animated pulse" v-for="purchase in this.user.purchases">
+            <div class="card">
+                <div class="card-content has-text-centered">
+                    <strong> {{ purchase.productName }}</strong>
                 </div>
             </div>
         </div>
@@ -80,7 +103,9 @@
                 name: '',
                 balance: 0,
                 pic_url: 0,
+                purchases: []
             },
+            errors: ''
         },
         mounted() {
             this.listProducts();
@@ -103,10 +128,23 @@
                     this.products = data.products;
                 });
             },
+            listUserPurchases() {
+                userService.emit('get', {userId: this.user._id}, (data) => {
+                    this.user.purchases = data.user.purchases;
+                });
+            },
+            getLatestPurchase(purchase) {
+                let productName;
+
+                productService.emit('get', {productId: purchase.productId}, (data) => {
+                    productName = data.product.name;
+                    this.user.purchases.push({productName: productName});
+                });
+            },
             createUser() {
                 this.$http.get('https://randomuser.me/api').then(res => {
-                    let firstName = res.body.results[0].name.first;
-                    let lastName = res.body.results[0].name.last;
+                    let firstName = this.$options.filters.capitalize(res.body.results[0].name.first);
+                    let lastName = this.$options.filters.capitalize(res.body.results[0].name.last);
                     let fullName = `${firstName} ${lastName}`;
                     let picUrl = res.body.results[0].picture.thumbnail;
 
@@ -115,15 +153,21 @@
                         this.user.name = data.createUser.name;
                         this.user.pic_url = data.createUser.pic_url;
                         this.user._id = data.createUser._id;
+                        this.listUserPurchases();
                     });
                 }, res => {
+                    //TODO:Error
                     console.log(res);
                 });
             },
             purchaseProduct(productId) {
-                console.log(productId);
                 purchaseService.emit('buy', {userId: this.user._id, productId: productId}, (data) => {
-                    // this.products = data.products;
+                    if (data.errors) {
+                        this.errors = data.errors;
+                        return;
+                    }
+                    this.getLatestPurchase(data.createPurchase);
+                    this.listProducts();
                 });
             }
         }

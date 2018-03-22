@@ -4,10 +4,10 @@ const bodyParser = require('body-parser');
 const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
-require('pretty-error').start();
 const PORT = 5002;
 const URL = 'http://localhost';
 const MONGO_URL = 'mongodb://localhost:27017';
+require('pretty-error').start();
 
 const prepare = (o) => {
     o._id = o._id.toString();
@@ -56,8 +56,12 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     
           type Mutation {
             createUser(balance: Int, name: String, pic_url: String): User
+            updateUserBalance(_id: String, balance: Int): User
+            
             createProduct(price: Int, stock: Int, name: String): Product
+            updateProductStock(_id: String, stock: Int): Product
             deleteProduct(_id: String): Product
+            
             createPurchase(userId: String, productId: String): Purchase
           }
     
@@ -76,8 +80,6 @@ MongoClient.connect(MONGO_URL, (err, client) => {
                 return (await Users.find({}).toArray()).map(prepare)
             },
             product: async (root, {_id}) => {
-                console.log("IN RESOLVER");
-                console.log(_id);
                 return prepare(await Products.findOne(ObjectId(_id)))
             },
             products: async () => {
@@ -95,9 +97,19 @@ MongoClient.connect(MONGO_URL, (err, client) => {
                 const res = await Users.insertOne(args);
                 return prepare(await Users.findOne({_id: res.insertedId}))
             },
+            updateUserBalance: async (root, args) => {
+                let filter = {_id: ObjectId(args._id)};
+                let balance = {$set: {balance: args.balance}};
+                return await Users.findOneAndUpdate(filter, balance);
+            },
             createProduct: async (root, args) => {
                 const res = await Products.insertOne(args);
                 return prepare(await Products.findOne({_id: res.insertedId}))
+            },
+            updateProductStock: async (root, args) => {
+                let filter = {_id: ObjectId(args._id)};
+                let stock = {$set: {stock: args.stock}};
+                return await Products.findOneAndUpdate(filter, stock);
             },
             deleteProduct: async (root, args) => {
                 args._id = ObjectId(args._id);

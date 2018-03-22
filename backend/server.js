@@ -48,7 +48,7 @@ app.delete('/product/:id', function (req, res) {
 });
 
 app.get('/purchase', function (req, res) {
-    purchaseRequester.send({type: 'list'}, function (err, purchases) {
+    purchaseRequester.send({type: 'list'}, function (purchases) {
         res.send(purchases);
     });
 });

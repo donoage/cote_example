@@ -8,11 +8,15 @@
     <link rel="stylesheet" href="//cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var userService = io.connect('/user');
         var productService = io.connect('/product');
+        var purchaseService = io.connect('/purchase');
     </script>
     <style>
         * {
@@ -23,10 +27,11 @@
 <body>
 <div id="app" class="container is-widescreen">
     <nav class="navbar" role="navigation" aria-label="dropdown navigation">
-        <a class="navbar-item">
-            <img src="https://bulma.io/images/bulma-logo.png" alt=""
-                 width="112" height="28">
-        </a>
+        <div class="logo animated jello">
+            <img src="https://static1.squarespace.com/static/59975f9a9f7456d2866ec54e/t/599c7d5b893fc0a2909944f6/1521153598582/?format=1500w"
+                 alt=""
+                 width="80">
+        </div>
     </nav>
     <section class="hero is-primary">
         <div class="hero-body">
@@ -35,12 +40,12 @@
                     Backoffice
                 </h1>
                 <h2 class="subtitle">
-                    This is control center for admins
+                    Control Center For Admins
                 </h2>
             </div>
         </div>
     </section>
-    <h1 class="title"></h1>
+    <br>
     <section class="tile is-ancestor">
         <div class="tile is-vertical is-8">
             <div class="tile">
@@ -89,17 +94,17 @@
                     <article class="tile is-child box">
                         <p class="title">Product</p>
                         <p class="subtitle">Catalog</p>
-                        <table class="table is-fullwidth">
+                        <table class="table is-fullwidth" v-if="products">
                             <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Price</th>
-                                <th>Balance</th>
+                                <th>Stock</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="product in products">
+                            <tr v-for="product in products" v-if="products">
                                 <th>{{ product.name }}</th>
                                 <td>{{ product.price }}</td>
                                 <td>{{ product.stock }}</td>
@@ -113,35 +118,43 @@
                 </div>
             </div>
             <div class="tile is-parent">
-                <article class="tile is-child box is-danger">
-                    <p class="title">User</p>
-                    <p class="subtitle">List</p>
-                    <table class="table is-fullwidth">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Balance</th>
-                            <th>Purchases</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="user in users">
-                            <th>{{ user.name }}</th>
-                            <td>{{ user.balance }}</td>
-                            <td>{{ user.purchases }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                <article class="tile is-child box">
+                    <p class="title">Purchase</p>
+                    <p class="subtitle">History</p>
+
+                    <div class="content animated fadeInUp" v-for="purchase in purchases">
+                        <ul>
+                            <li>
+                                <strong>{{ purchase.userName }}</strong>
+                                purchased
+                                <strong>{{ purchase.productName }}</strong>
+                            </li>
+                        </ul>
+                    </div>
+
                 </article>
             </div>
         </div>
         <div class="tile is-parent">
-            <article class="tile is-child box is-success">
+            <article class="tile is-child box">
                 <div class="content">
-                    <p class="title">Purchase</p>
-                    <p class="subtitle">History</p>
+                    <p class="title">User</p>
+                    <p class="subtitle">List</p>
                     <div class="content">
-                        <!-- Content -->
+                        <table class="table is-fullwidth" v-if="users">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Balance</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="user in users" v-if="users">
+                                <th>{{ user.name }}</th>
+                                <td>{{ user.balance }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </article>
@@ -156,6 +169,7 @@
         data: {
             users: [],
             products: [],
+            purchases: [],
             newProduct: {
                 name: '',
                 price: 0,
@@ -170,18 +184,45 @@
         mounted() {
             this.listUsers();
             this.listProducts();
+            this.listPurchases();
         },
         methods: {
             listUsers() {
-                this.$http.get('/user').then(res => {
-                    this.users = res.body.users;
-                }, res => {
-                    console.log(res);
+                userService.emit('list', (data) => {
+                    this.users = data.users;
                 });
             },
             listProducts() {
-                productService.emit('list', (data) =>  {
+                productService.emit('list', (data) => {
                     this.products = data.products;
+                });
+            },
+            listPurchases() {
+                purchaseService.emit('list', (data) => {
+                    _.forEach(data.purchases, (purchase) => {
+                        let userName;
+                        let productName;
+
+                        userService.emit('get', {userId: purchase.userId}, (data) => {
+                            userName = data.user.name;
+                            productService.emit('get', {productId: purchase.productId}, (data) => {
+                                productName = data.product.name;
+                                this.purchases.push({userName: userName, productName: productName});
+                            });
+                        });
+                    });
+                });
+            },
+            getLatestPurchase(purchase) {
+                let userName;
+                let productName;
+
+                userService.emit('get', {userId: purchase.userId}, (data) => {
+                    userName = data.user.name;
+                    productService.emit('get', {productId: purchase.productId}, (data) => {
+                        productName = data.product.name;
+                        this.purchases.push({userName: userName, productName: productName});
+                    });
                 });
             },
             checkForm(e) {
@@ -200,19 +241,21 @@
                     this.newProduct.price = formData.newProductPrice.value;
                     this.newProduct.stock = formData.newProductStock.value;
 
-                    this.$http.post('/product', this.newProduct).then(res => {
-                        // success
-                        this.errors = {
-                            name: '',
-                            price: '',
-                            stock: '',
-                        };
-                        formData.newProductName.value = '';
-                        formData.newProductPrice.value = '';
-                        formData.newProductStock.value = '';
-                    }, res => {
-                        // error
-                       console.log(res);
+                    productService.emit('create', {product: this.newProduct}, (data, err) => {
+                        if (!data.errors) {
+                            this.errors = {
+                                name: '',
+                                price: '',
+                                stock: '',
+                            };
+
+                            this.products = data.products;
+                            formData.newProductName.value = '';
+                            formData.newProductPrice.value = '';
+                            formData.newProductStock.value = '';
+                        } else {
+                            //TODO:Error checking
+                        }
                     });
                 }
 
@@ -221,12 +264,11 @@
                 if (!formData.newProductStock.value) this.errors.stock = "Stock required.";
             },
             deleteProduct(productId) {
-                console.log(productId);
                 this.$http.delete(`/product/${productId}`).then(res => {
-                    // success
+                    //TODO:Success
                     console.log(res);
                 }, res => {
-                    // error
+                    //TODO:Error
                     console.log(res);
                 });
             }
@@ -235,6 +277,12 @@
 
     userService.on('update', app.listUsers);
     productService.on('update', app.listProducts);
+    purchaseService.on('update', (data) => {
+        app.listProducts();
+
+        let lastPurchase = data.purchases[data.purchases.length - 1];
+        app.getLatestPurchase(lastPurchase);
+    });
 </script>
 </body>
 </html>
