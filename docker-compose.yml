@@ -1,0 +1,118 @@
+version: '2'
+services:
+  base:
+    container_name: cotejs_base
+    build: .
+    restart: on-failure
+    volumes:
+      - ./:/var/www/app
+    environment:
+      - DOCKER=true
+
+  lb:
+    container_name: cotejs_haproxy
+    image: dockercloud/haproxy
+    links:
+      - backend
+      - frontend
+      - graphql
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    restart: on-failure
+
+  db:
+    container_name: cotejs_db
+    extends: base
+    depends_on:
+      - mongo
+
+  mongo:
+    container_name: cotejs_mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+
+  backend:
+    container_name: cotejs_backend_server
+    extends: base
+    command: node backend/server.js
+    environment:
+      - VIRTUAL_HOST=admin.cotejs.org, ws://admin.cotejs.org
+      - BALANCE=source
+    ports:
+      - 5000:5000
+    volumes:
+        - ./backend:/var/www/app/backend
+
+  frontend:
+    container_name: cotejs_frontend_server
+    extends: base
+    command: node frontend/server.js
+    environment:
+      - VIRTUAL_HOST=client.cotejs.org, ws://client.cotejs.org
+      - BALANCE=source
+    ports:
+      - 5001:5001
+    volumes:
+      - ./frontend:/var/www/app/frontend
+
+
+  graphql:
+    container_name: cotejs_graphql_server
+    extends: base
+    command: node graphql/server.js
+    environment:
+      - VIRTUAL_HOST=graphql.cotejs.org, ws://graphql.cotejs.org
+      - BALANCE=source
+    ports:
+      - 5002:5002
+    volumes:
+      - ./graphql:/var/www/app/graphql
+
+#  monitoring:
+#    extends: base
+#    command: node monitor.js
+#    environment:
+#      - PORT=80
+#      - VIRTUAL_HOST=local-monitoring.cotejs.org
+#    ports:
+#      - 5555:5555
+
+  payment-service:
+    container_name: cotejs_payment_service
+    extends: base
+    command: node services/payment-service.js
+    volumes:
+        - ./services/payment-service.js:/var/www/app/services/payment-service.js
+    depends_on:
+      - db
+
+  product-service:
+    container_name: cotejs_product_service
+    extends: base
+    command: node services/product-service.js
+    volumes:
+        - ./services/product-service.js:/var/www/app/services/product-service.js
+    depends_on:
+      - db
+
+  purchase-service:
+    container_name: cotejs_purchase_service
+    extends: base
+    command: node services/purchase-service.js
+    volumes:
+        - ./services/purchase-service.js:/var/www/app/services/purchase-service.js
+    depends_on:
+      - db
+
+  user-service:
+    container_name: cotejs_user_service
+    extends: base
+    command: node services/user-service.js
+    volumes:
+        - ./services/user-service.js:/var/www/app/services/user-service.js
+    depends_on:
+      - db

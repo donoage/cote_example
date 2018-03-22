@@ -1,17 +1,17 @@
 {
   "apps": [
     {
-      "name": "backend",
+      "name": "backend-server",
       "script": "backend/server.js",
       "watch": "backend/server.js"
     },
     {
-      "name": "frontend",
+      "name": "frontend-server",
       "script": "frontend/server.js",
       "watch": "frontend/server.js"
     },
     {
-      "name": "graphql",
+      "name": "graphql-server",
       "script": "graphql/server.js",
       "watch": "graphql/server.js"
     },

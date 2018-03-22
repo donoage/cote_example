@@ -266,10 +266,8 @@
             deleteProduct(productId) {
                 this.$http.delete(`/product/${productId}`).then(res => {
                     //TODO:Success
-                    console.log(res);
                 }, res => {
                     //TODO:Error
-                    console.log(res);
                 });
             }
         }

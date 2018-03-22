@@ -1,7 +1,8 @@
 const cote = require('cote');
 const {createApolloFetch} = require('apollo-fetch');
 const fetch = createApolloFetch({
-    uri: 'http://localhost:5002/graphql',
+    //TODO: fix using conf
+    uri: 'http://docker.for.mac.localhost:5002/graphql',
 });
 require('pretty-error').start();
 
@@ -40,6 +41,11 @@ userResponder.on('create', function (req, cb) {
     fetch({
         query, variables
     }).then(res => {
+        // TODO: Refer to this error.
+        if (res.errors) {
+            cb(res);
+        }
+
         updateUsers();
         cb(res.data);
     });

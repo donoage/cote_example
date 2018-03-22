@@ -5,8 +5,14 @@ const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
 const PORT = 5002;
+let MONGO_URL = '';
+if (process.env.DOCKER == 'true') {
+    MONGO_URL = 'mongodb://mongo:27017';
+} else {
+    MONGO_URL = 'mongodb://localhost:27017';
+}
+
 const URL = 'http://localhost';
-const MONGO_URL = 'mongodb://localhost:27017';
 require('pretty-error').start();
 
 const prepare = (o) => {
