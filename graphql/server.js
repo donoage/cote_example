@@ -5,6 +5,7 @@ const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
 const port = process.env.PORT || 5002;
+const cote = require('cote');
 let MONGO_URL = '';
 if (process.env.DOCKER == 'true') {
     MONGO_URL = 'mongodb://mongo:27017';
@@ -22,10 +23,18 @@ const prepare = (o) => {
 
 MongoClient.connect(MONGO_URL, (err, client) => {
     const db = client.db('sbae_cote_example');
-
-    const Users = db.collection('users');
+    // const Users = db.collection('users');
     const Products = db.collection('products');
     const Purchases = db.collection('purchases');
+
+    let userRequester = new cote.Requester({
+        name: 'graphqlUserRequester',
+        namespace: 'user'
+    });
+    let productRequester = new cote.Requester({
+        name: 'graphqlProductRequester',
+        namespace: 'product'
+    });
 
     const typeDefs = [`
           type Query {
@@ -80,16 +89,26 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     const resolvers = {
         Query: {
             user: async (root, {_id}) => {
-                return prepare(await Users.findOne(ObjectId(_id)))
+                userRequester.send({type: 'get', _id: _id}, (user) => {
+                    return user;
+                });
             },
             users: async () => {
-                return (await Users.find({}).toArray()).map(prepare)
+                userRequester.send({type: 'list'}, (users) => {
+                    return users;
+                });
             },
             product: async (root, {_id}) => {
+                productRequester.send({type: 'get', _id: _id}, (product) => {
+                    return product;
+                });
                 return prepare(await Products.findOne(ObjectId(_id)))
             },
             products: async () => {
-                return (await Products.find({}).toArray()).map(prepare)
+                productRequester.send({type: 'list'}, (products) => {
+                    return products;
+                });
+                // return (await Products.find({}).toArray()).map(prepare)
             },
             purchase: async (root, {_id}) => {
                 return prepare(await Purchases.findOne(ObjectId(_id)))

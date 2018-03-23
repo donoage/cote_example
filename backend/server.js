@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cote = require('cote');
+const {createApolloFetch} = require('apollo-fetch');
+const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
+const fetch = createApolloFetch({uri: uri});
 require('pretty-error').start();
 
 app.use(bodyParser.json());
@@ -14,13 +17,80 @@ app.all('*', function (req, res, next) {
 });
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    fetch({
+        query: `{
+              products {
+                _id
+                name
+                price
+                stock
+              }
+              users {
+                _id
+                name
+                balance
+                pic_url
+              }
+              purchases {
+                _id
+                userId
+                productId
+              }
+            }`,
+    }).then(response => {
+        res.send(response.data);
+    });
+});
+app.get('/start', function (req, res) {
+    fetch({
+        query: `{
+              products {
+                _id
+                name
+                price
+                stock
+              }
+              users {
+                _id
+                name
+                balance
+                pic_url
+              }
+              purchases {
+                _id
+                userId
+                productId
+              }
+            }`,
+    }).then(response => {
+        res.send(response.data);
+    });
 });
 
 
 app.get('/user', function (req, res) {
-    userRequester.send({type: 'list'}, function (users) {
-        res.send(users);
+    fetch({
+        query: `{
+          products {
+            _id
+            name
+            price
+            stock
+          }
+          users {
+            _id
+            name
+            balance
+            pic_url
+          }
+          purchases {
+            _id
+            userId
+            productId
+          }
+        }`,
+    }).then(response => {
+        res.send(response.data);
     });
 });
 

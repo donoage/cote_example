@@ -1,7 +1,8 @@
 const cote = require('cote');
 const {createApolloFetch} = require('apollo-fetch');
+const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
 const fetch = createApolloFetch({
-    uri: 'http://docker.for.mac.localhost:5002/graphql',
+    uri: uri,
 });
 
 let paymentResponder = new cote.Responder({
