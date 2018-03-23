@@ -1,3 +1,4 @@
+const port = process.env.PORT || 5000;
 const app = require('express')();
 const bodyParser = require('body-parser');
 const server = require('http').Server(app);
@@ -32,7 +33,7 @@ app.get('/product', function (req, res) {
 app.post('/product', function (req, res) {
     productRequester.send({type: 'create', product: req.body}, function (product) {
         if (product.errors) {
-            res.status(500).send('Something broke!');
+            res.status(500).send(product.errors.message);
         }
         res.send(product.data);
     });
@@ -76,7 +77,7 @@ server.on('error', function (e) {
     }
 });
 
-server.listen(5000);
+server.listen(port);
 
 new cote.Sockend(io, {
     name: 'admin sockend server'

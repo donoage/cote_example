@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
-const PORT = 5002;
+const port = process.env.PORT || 5002;
 let MONGO_URL = '';
 if (process.env.DOCKER == 'true') {
     MONGO_URL = 'mongodb://mongo:27017';
@@ -148,7 +148,7 @@ MongoClient.connect(MONGO_URL, (err, client) => {
         endpointURL: '/graphql'
     }));
 
-    app.listen(PORT, () => {
-        console.log(`Visit ${URL}:${PORT}${homePath}`)
+    app.listen(port, () => {
+        console.log(`Visit ${URL}:${port}${homePath}`)
     })
 });

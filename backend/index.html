@@ -189,6 +189,7 @@
         methods: {
             listUsers() {
                 userService.emit('list', (data) => {
+                    console.log(data);
                     this.users = data.users;
                 });
             },

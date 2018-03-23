@@ -53,14 +53,25 @@ userResponder.on('create', function (req, cb) {
 
 userResponder.on('list', function (req, cb) {
     fetch({
-        query: `{ 
-                  users {
-                    _id 
-                    balance
-                    name
-                    pic_url
-                  }
-                }`,
+        query: `{
+              products {
+                _id
+                name
+                price
+                stock
+              }
+              users {
+                _id
+                name
+                balance
+                pic_url
+              }
+              purchases {
+                _id
+                userId
+                productId
+              }
+            }`,
     }).then(res => {
         cb(res.data);
     });

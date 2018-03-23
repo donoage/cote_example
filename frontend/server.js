@@ -1,3 +1,4 @@
+const port = process.env.PORT || 5001;
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
@@ -19,7 +20,7 @@ server.on('error', function (e) {
     }
 });
 
-server.listen(5001);
+server.listen(port);
 
 new cote.Sockend(io, {
     name: 'frontend sockend server'
