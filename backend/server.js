@@ -7,6 +7,7 @@ const cote = require('cote');
 const {createApolloFetch} = require('apollo-fetch');
 const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
 const fetch = createApolloFetch({uri: uri});
+
 require('pretty-error').start();
 
 app.use(bodyParser.json());
@@ -17,29 +18,7 @@ app.all('*', function (req, res, next) {
 });
 
 app.get('/', function (req, res) {
-    fetch({
-        query: `{
-              products {
-                _id
-                name
-                price
-                stock
-              }
-              users {
-                _id
-                name
-                balance
-                pic_url
-              }
-              purchases {
-                _id
-                userId
-                productId
-              }
-            }`,
-    }).then(response => {
-        res.send(response.data);
-    });
+    res.sendFile(__dirname + '/index.html');
 });
 app.get('/start', function (req, res) {
     fetch({
@@ -101,22 +80,50 @@ app.get('/product', function (req, res) {
 });
 
 app.post('/product', function (req, res) {
-    productRequester.send({type: 'create', product: req.body}, function (product) {
-        if (product.errors) {
-            res.status(500).send(product.errors.message);
-        }
-        res.send(product.data);
+    const query = `
+            mutation createProductMutation($price: Int!, $stock: Int!, $name: String!) {
+                createProduct(price: $price, stock: $stock, name: $name) {
+                    _id
+                    name
+                    price
+                    stock
+                }
+            }`;
+
+    const variables = {
+        name: req.product.name,
+        price: req.product.price,
+        stock: req.product.stock,
+    };
+
+    fetch({
+        query, variables
+    }).then(res => {
+        updateProducts();
+        res.send(res);
     });
 });
 
 app.delete('/product/:id', function (req, res) {
-    productRequester.send({type: 'delete', id: req.params.id}, function (product) {
-        if (product.errors) {
-            res.status(500).send('Something broke!');
+    const query = `
+    mutation deleteProductMutation($id: String!) {
+        deleteProduct(_id: $id) {
+            _id
         }
-        res.send(product.data);
+    }
+    `;
+    const variables = {
+        id: req.id
+    };
+
+    fetch({
+        query, variables
+    }).then(response => {
+        updateProducts();
+        res.send(response);
     });
 });
+
 
 app.get('/purchase', function (req, res) {
     purchaseRequester.send({type: 'list'}, function (purchases) {

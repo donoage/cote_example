@@ -183,14 +183,13 @@
         },
         mounted() {
             this.listUsers();
-            this.listProducts();
+            // this.listProducts();
             // this.listPurchases();
         },
         methods: {
             listUsers() {
-                userService.emit('list', (data) => {
-                    console.log(data);
-                    this.users = data.users;
+                userService.emit('list', (users) => {
+                    this.users = users;
                 });
             },
             listProducts() {

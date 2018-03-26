@@ -126,8 +126,11 @@
         },
         methods: {
             listProducts() {
-                productService.emit('list', (data) => {
-                    this.products = data.products;
+                this.$http.get('/products').then(res => {
+                    console.log(res);
+                    this.products = res.body;
+                }, res => {
+                    //TODO:Error
                 });
             },
             listUserPurchases() {
@@ -150,26 +153,28 @@
                     let fullName = `${firstName} ${lastName}`;
                     let picUrl = res.body.results[0].picture.thumbnail;
 
-                    userService.emit('create', {balance: 100, name: fullName, pic_url: picUrl}, (data) => {
-                        this.user.balance = data.createUser.balance;
-                        this.user.name = data.createUser.name;
-                        this.user.pic_url = data.createUser.pic_url;
-                        this.user._id = data.createUser._id;
-                        this.listUserPurchases();
+                    this.$http.post('/create', {fullName: fullName, picUrl: picUrl}).then(res => {
+                        this.user.balance = res.body.balance;
+                        this.user.name = res.body.name;
+                        this.user.pic_url = res.body.pic_url;
+                        this.user._id = res.body._id;
                     });
                 }, res => {
                     //TODO:Error
                 });
             },
             purchaseProduct(productId) {
-                purchaseService.emit('buy', {userId: this.user._id, productId: productId}, (data) => {
-                    if (data.errors) {
-                        this.errors = data.errors;
-                        return;
-                    }
-                    this.getLatestPurchase(data.createPurchase);
-                    this.listProducts();
+                this.$http.post('/buy', {userId: this.user._id, productId: productId}).then(res => {
+                    console.log(res);
                 });
+                // purchaseService.emit('buy', {userId: this.user._id, productId: productId}, (data) => {
+                //     if (data.errors) {
+                //         this.errors = data.errors;
+                //         return;
+                //     }
+                //     this.getLatestPurchase(data.createPurchase);
+                //     this.listProducts();
+                // });
             }
         }
     });

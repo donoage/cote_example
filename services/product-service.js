@@ -33,50 +33,21 @@ MongoClient.connect(MONGO_URL, (err, client) => {
         cb((await Products.find({}).toArray()).map(prepare));
     });
 
-    productResponder.on('create', function (req, cb) {
-        const query = `
-    mutation createProductMutation($price: Int!, $stock: Int!, $name: String!) {
-        createProduct(price: $price, stock: $stock, name: $name) {
-            _id
-            name
-            price
-            stock
-        }
-    }
-    `;
-
-        const variables = {
-            name: req.product.name,
-            price: req.product.price,
-            stock: req.product.stock,
-        };
-
-        fetch({
-            query, variables
-        }).then(res => {
-            updateProducts();
-            cb(res);
-        });
+    productResponder.on('create', async (req, cb) => {
+        const res = await Products.insertOne(args);
+        cb(prepare(await Products.findOne({_id: res.insertedId})));
     });
 
-    productResponder.on('delete', function (req, cb) {
-        const query = `
-    mutation deleteProductMutation($id: String!) {
-        deleteProduct(_id: $id) {
-            _id
-        }
-    }
-    `;
-        const variables = {
-            id: req.id
-        };
+    productResponder.on('updateStock', async (req, cb) => {
+        let filter = {_id: ObjectId(req.product._id)};
+        let balance = {$set: {stock: req.product.stock}};
 
-        fetch({
-            query, variables
-        }).then(res => {
-            updateProducts();
-            cb(res);
-        });
+        cb(await Products.findOneAndUpdate(filter, balance));
+    });
+
+    productResponder.on('delete', async (req, cb) => {
+        req._id = ObjectId(req._id);
+        cb(await Products.deleteOne(req));
     });
 
 });

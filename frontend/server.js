@@ -1,16 +1,175 @@
 const port = process.env.PORT || 5001;
 const app = require('express')();
+const bodyParser = require('body-parser');
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cote = require('cote');
-
+const {createApolloFetch} = require('apollo-fetch');
+const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
+const fetch = createApolloFetch({uri: uri});
 require('pretty-error').start();
+app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
     console.log(`${req.ip} requested end-user interface`);
     res.sendFile(__dirname + '/index.html');
 });
+app.get('/products', function (req, res) {
+    fetch({
+        query: `{
+              products {
+                _id
+                name
+                price
+                stock
+              }
+            }`,
+    }).then(result => {
+        if (result.errors) {
+            res.status(500).send(result.errors.message);
+        }
+        res.send(result.data.products);
+    });
+});
 
+app.post('/create', function (req, res) {
+    const query = `
+    mutation createUserMutation($balance: Int!, $name: String!, $pic_url: String!) {
+        createUser(balance: $balance, name: $name, pic_url: $pic_url) {
+            _id
+            balance
+            name
+            pic_url
+        }
+    }
+    `;
+
+    const variables = {
+        balance: 100,
+        name: req.body.fullName,
+        pic_url: req.body.picUrl,
+    };
+
+    fetch({
+        query, variables
+    }).then(result => {
+        if (result.errors) {
+            res.status(500).send(result.errors.message);
+        }
+        res.send(result.data.createUser);
+    });
+});
+
+app.post('/buy', function (req, res) {
+    console.log('1. BUY ----', req.body);
+    // get the product and check stock
+    const query = `
+       query($id: String!) {
+            product(_id: $id) {
+                _id 
+                name
+                price
+                stock
+            }
+        }`;
+    const variables = {id: req.body.productId};
+    fetch({query, variables}).then(result => {
+        let product = result.data.product;
+        if (product.stock === 0) return res.send({errors: 'No More Product Left.'});
+
+        console.log('2. BUY ----', product);
+
+        // get the user and check balance
+        const query = `
+            query($id: String!) {
+                user(_id: $id) {
+                    _id 
+                    balance
+                    name
+                    pic_url
+                }
+            }
+            `;
+        const variables = {id: req.body.userId};
+        fetch({query, variables}).then(result => {
+            console.log('3. BUY ----', result);
+            let user = result.data.user;
+            if (user.balance < product.price) return res.send({errors: 'Not Enough Balance.'});
+            user.balance -= product.price;
+
+            // update user balance
+            const query = `
+                mutation updateUserBalanceMutation($id: String!, $balance: Int!) {
+                    updateUserBalance(_id: $id, balance: $balance) {
+                        _id
+                        balance
+                    }
+                }`;
+
+            const variables = {
+                id: user._id,
+                balance: user.balance,
+            };
+
+            fetch({query, variables}).then(result => {
+                product.stock--;
+                // update the product stock
+                const query = `
+                mutation updateProductStockMutation($id: String!, $stock: Int!) {
+                    updateProductStock(_id: $id, stock: $stock) {
+                        _id
+                        stock
+                    }
+                }`;
+                const variables = {
+                    id: product._id,
+                    stock: product.stock,
+                };
+                fetch({query, variables}).then(result => {
+                    console.log('4. BUY ----', result);
+                    const query = `
+                    mutation createPurchaseMutation($userId: String!, $productId: String!) {
+                        createPurchase(userId: $userId, productId: $productId) {
+                            _id
+                            userId
+                            productId
+                        }
+                    }`;
+                    const variables = {
+                        userId: req.body.userId,
+                        productId: req.body.productId,
+                    };
+                    fetch({query, variables}).then(result => {
+                        console.log('4. BUY ----', result);
+                        // updatePurchases();
+                        res.send(result.data);
+                    });
+                });
+            });
+        });
+    });
+    //
+    //
+    // paymentRequester.send({type: 'process', userId: req.userId, price: product.price}, (res) => {
+    //     if (res.errors) return cb(res);
+    //     product.stock--;
+    //     // update the product stock
+    //     const query = `
+    //             mutation updateProductStockMutation($id: String!, $stock: Int!) {
+    //                 updateProductStock(_id: $id, stock: $stock) {
+    //                     _id
+    //                     stock
+    //                 }
+    //             }`;
+    //     const variables = {
+    //         id: product._id,
+    //         stock: product.stock,
+    //     };
+    //     fetch({query, variables}).then(res => {
+    //
+    //     });
+    // });
+});
 
 server.on('error', function (e) {
     if (e.code === 'EADDRINUSE') {

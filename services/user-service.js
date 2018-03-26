@@ -1,27 +1,25 @@
 require('pretty-error').start();
 const cote = require('cote');
 const {MongoClient, ObjectId} = require('mongodb');
-const {createApolloFetch} = require('apollo-fetch');
-// const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
-// const fetch = createApolloFetch({uri: uri});
 const MONGO_URL = (process.env.DOCKER == 'true') ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017';
+
 const prepare = (o) => {
     o._id = o._id.toString();
     return o
 };
 
-let userResponder = new cote.Responder({
-    name: 'userServiceResponder',
-    namespace: 'user',
-    respondsTo: ['create', 'list', 'get']
-});
-let userPublisher = new cote.Publisher({
-    name: 'userServicePublisher',
-    namespace: 'user',
-    broadcasts: ['update']
-});
-
 MongoClient.connect(MONGO_URL, (err, client) => {
+    let userResponder = new cote.Responder({
+        name: 'userServiceResponder',
+        namespace: 'user',
+        respondsTo: ['create', 'list', 'get']
+    });
+    let userPublisher = new cote.Publisher({
+        name: 'userServicePublisher',
+        namespace: 'user',
+        broadcasts: ['update']
+    });
+
     const db = client.db('sbae_cote_example');
     const Users = db.collection('users');
 
@@ -51,38 +49,21 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     userResponder.on('list', async (req, cb) => {
         cb((await Users.find({}).toArray()).map(prepare));
     });
-});
 
-userResponder.on('create', function (req, cb) {
-    const query = `
-    mutation createUserMutation($balance: Int!, $name: String!, $pic_url: String!) {
-        createUser(balance: $balance, name: $name, pic_url: $pic_url) {
-            _id 
-            balance
-            name
-            pic_url
-        }
-    }
-    `;
 
-    const variables = {
-        balance: req.balance,
-        name: req.name,
-        pic_url: req.pic_url,
-    };
+    userResponder.on('create', async (req, cb) => {
+        const res = await Users.insertOne(req.args);
+        cb(await prepare(await Users.findOne({_id: res.insertedId})));
+    });
 
-    fetch({
-        query, variables
-    }).then(res => {
-        // TODO: Refer to this error.
-        if (res.errors) {
-            cb(res);
-        }
-
-        updateUsers();
-        cb(res.data);
+    userResponder.on('updateBalance', async (req, cb) => {
+        console.log('updatebalance---', req);
+        let filter = {_id: ObjectId(req.args._id)};
+        let balance = {$set: {balance: req.args.balance}};
+        cb(await Users.findOneAndUpdate(filter, balance));
     });
 });
+
 
 function updateUsers() {
     fetch({
