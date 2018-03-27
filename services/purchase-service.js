@@ -1,8 +1,4 @@
 const cote = require('cote');
-const {createApolloFetch} = require('apollo-fetch');
-const fetch = createApolloFetch({
-    uri: 'http://docker.for.mac.localhost:5002/graphql',
-});
 const {MongoClient, ObjectId} = require('mongodb');
 const MONGO_URL = (process.env.DOCKER == 'true') ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017';
 const prepare = (o) => {
@@ -18,7 +14,7 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     let purchaseResponder = new cote.Responder({
         name: 'purchase responder',
         namespace: 'purchase',
-        respondsTo: ['buy', 'list']
+        respondsTo: ['buy', 'list', 'get']
     });
 
     let purchasePublisher = new cote.Publisher({
@@ -27,18 +23,18 @@ MongoClient.connect(MONGO_URL, (err, client) => {
         broadcasts: ['update']
     });
 
-    let paymentRequester = new cote.Requester({
-        name: 'payment requester',
-        key: 'payment'
-    });
-
     purchaseResponder.on('*', console.log);
 
-    purchaseResponder.on('buy', function (req, cb) {
-
+    purchaseResponder.on('get', async (req, cb) => {
+        cb(prepare(await Purchases.findOne(ObjectId(req._id))));
     });
 
     purchaseResponder.on('list', async (req, cb) => {
+        if (req.userId)
+            cb((await Purchases.find({userId: req.userId}).toArray()).map(prepare));
+        if (req.productId)
+            cb((await Purchases.find({productId: req.productId}).toArray()).map(prepare));
+
         cb((await Purchases.find({}).toArray()).map(prepare));
     });
 

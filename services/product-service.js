@@ -1,8 +1,5 @@
 const cote = require('cote');
 const {MongoClient, ObjectId} = require('mongodb');
-const {createApolloFetch} = require('apollo-fetch');
-const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
-const fetch = createApolloFetch({uri: uri});
 const MONGO_URL = (process.env.DOCKER == 'true') ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017';
 const prepare = (o) => {
     o._id = o._id.toString();

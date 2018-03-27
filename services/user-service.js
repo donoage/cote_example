@@ -32,7 +32,6 @@ MongoClient.connect(MONGO_URL, (err, client) => {
         cb((await Users.find({}).toArray()).map(prepare));
     });
 
-
     userResponder.on('create', async (req, cb) => {
         const res = await Users.insertOne(req.args);
         cb(await prepare(await Users.findOne({_id: res.insertedId})));

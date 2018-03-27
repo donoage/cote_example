@@ -1,10 +1,5 @@
 const cote = require('cote');
 
-const prepare = (o) => {
-    o._id = o._id.toString();
-    return o
-};
-
 let userRequester = new cote.Requester({
     name: 'graphqlUserRequester',
     namespace: 'user'
@@ -56,7 +51,6 @@ const resolvers = {
                     return resolve(purchase);
                 });
             });
-            // return prepare(await Purchases.findOne(ObjectId(_id)))
         },
         purchases: async () => {
             return new Promise((resolve, reject) => {
@@ -64,7 +58,6 @@ const resolvers = {
                     return resolve(purchases);
                 });
             });
-            // return (await Purchases.find({}).toArray()).map(prepare)
         },
     },
     Mutation: {
@@ -131,9 +124,50 @@ const resolvers = {
     },
     User: {
         purchases: async ({_id}) => {
-            // return (await Purchases.find({userId: _id}).toArray()).map(prepare)
+            return new Promise((resolve, reject) => {
+                purchaseRequester.send({type: 'list', userId: _id}, (purchase) => {
+                    if (purchase.errors) {
+                        return reject(purchase.errors);
+                    }
+                    return resolve(purchase);
+                });
+            });
         }
     },
+    Product: {
+        purchases: async ({_id}) => {
+            return new Promise((resolve, reject) => {
+                purchaseRequester.send({type: 'list', productId: _id}, (purchase) => {
+                    if (purchase.errors) {
+                        return reject(purchase.errors);
+                    }
+                    return resolve(purchase);
+                });
+            });
+        }
+    },
+    Purchase: {
+        user: async ({userId}) => {
+            return new Promise((resolve, reject) => {
+                userRequester.send({type: 'get', _id: userId}, (user) => {
+                    if (user.errors) {
+                        return reject(user.errors);
+                    }
+                    return resolve(user);
+                });
+            });
+        },
+        product: async ({productId}) => {
+            return new Promise((resolve, reject) => {
+                productRequester.send({type: 'get', _id: productId}, (product) => {
+                    if (product.errors) {
+                        return reject(product.errors);
+                    }
+                    return resolve(product);
+                });
+            });
+        }
+    }
 };
 
 module.exports = resolvers;

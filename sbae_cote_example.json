@@ -15,11 +15,11 @@
       "script": "graphql/server.js",
       "watch": "graphql/server.js"
     },
-    {
-      "name": "payment-service",
-      "script": "services/payment-service.js",
-      "watch": "services/payment-service.js"
-    },
+//    {
+//      "name": "payment-service",
+//      "script": "services/payment-service.js",
+//      "watch": "services/payment-service.js"
+//    },
     {
       "name": "product-service",
       "script": "services/product-service.js",
