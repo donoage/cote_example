@@ -5,7 +5,6 @@ const prepare = (o) => {
     o._id = o._id.toString();
     return o
 };
-require('pretty-error').start();
 
 MongoClient.connect(MONGO_URL, (err, client) => {
     const db = client.db('sbae_cote_example');

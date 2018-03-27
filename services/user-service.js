@@ -1,4 +1,3 @@
-require('pretty-error').start();
 const cote = require('cote');
 const {MongoClient, ObjectId} = require('mongodb');
 const MONGO_URL = (process.env.DOCKER == 'true') ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017';

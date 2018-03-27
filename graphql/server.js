@@ -3,11 +3,20 @@ const bodyParser = require('body-parser');
 const {graphqlExpress, graphiqlExpress} = require('graphql-server-express');
 const {makeExecutableSchema} = require('graphql-tools');
 const cors = require('cors');
-const port = process.env.PORT || 5002;
-const typeDefs = require('./type-defs.js');
+const {createServer} = require('http');
+// Subs
+const {execute, subscribe} = require('graphql');
+const {SubscriptionServer} = require('subscriptions-transport-ws');
+
+// GraphQL
 const resolvers = require('./resolvers.js');
+const typeDefs = require('./type-defs.js');
+
+// Conf
 const URL = 'http://localhost';
-require('pretty-error').start();
+const PORT = process.env.PORT || 5002;
+const SUBSCRIPTIONS_PATH = '/subscriptions';
+const HOME_PATH = '/graphiql';
 
 const schema = makeExecutableSchema({
     typeDefs,
@@ -15,15 +24,29 @@ const schema = makeExecutableSchema({
 });
 
 app.use(cors());
-
+app.use(bodyParser.urlencoded({extended: true}));
 app.use('/graphql', bodyParser.json(), graphqlExpress({schema}));
 
-const homePath = '/graphiql';
-
-app.use(homePath, graphiqlExpress({
+app.use(HOME_PATH, graphiqlExpress({
     endpointURL: '/graphql'
 }));
 
-app.listen(port, () => {
-    console.log(`Visit ${URL}:${port}${homePath}`)
+const server = createServer(app);
+
+server.listen(PORT, () => {
+    console.log(`Visit ${URL}:${PORT}${HOME_PATH}`);
+    console.log(`API Subscriptions server is now running on ws://localhost:${PORT}${SUBSCRIPTIONS_PATH}`);
 });
+
+// Subs
+SubscriptionServer.create(
+    {
+        schema,
+        execute,
+        subscribe,
+    },
+    {
+        server,
+        path: SUBSCRIPTIONS_PATH,
+    }
+);

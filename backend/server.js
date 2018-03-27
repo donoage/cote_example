@@ -8,8 +8,6 @@ const {createApolloFetch} = require('apollo-fetch');
 const uri = (process.env.DOCKER == 'true') ? 'http://docker.for.mac.localhost:5002/graphql' : 'http://localhost:5002/graphql';
 const fetch = createApolloFetch({uri: uri});
 
-require('pretty-error').start();
-
 app.use(bodyParser.json());
 
 app.all('*', function (req, res, next) {
