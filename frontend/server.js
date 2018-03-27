@@ -25,9 +25,7 @@ app.get('/products', function (req, res) {
               }
             }`,
     }).then(result => {
-        if (result.errors) {
-            res.status(500).send(result.errors.message);
-        }
+        if (result.errors) res.status(500).send(result.errors.message);
         res.send(result.data.products);
     });
 });
@@ -56,15 +54,14 @@ app.get('/user/:id', function (req, res) {
 
 app.post('/create', function (req, res) {
     const query = `
-    mutation createUserMutation($balance: Int!, $name: String!, $pic_url: String!) {
-        createUser(balance: $balance, name: $name, pic_url: $pic_url) {
-            _id
-            balance
-            name
-            pic_url
-        }
-    }
-    `;
+        mutation createUserMutation($balance: Int!, $name: String!, $pic_url: String!) {
+            createUser(balance: $balance, name: $name, pic_url: $pic_url) {
+                _id
+                balance
+                name
+                pic_url
+            }
+        }`;
 
     const variables = {
         balance: 100,
@@ -75,9 +72,7 @@ app.post('/create', function (req, res) {
     fetch({
         query, variables
     }).then(result => {
-        if (result.errors) {
-            res.status(500).send(result.errors.message);
-        }
+        if (result.errors) res.status(500).send(result.errors.message);
         res.send(result.data.createUser);
     });
 });
