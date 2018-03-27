@@ -80,14 +80,14 @@ services:
 #    ports:
 #      - 5555:5555
 
-  payment-service:
-    container_name: cotejs_payment_service
-    extends: base
-    command: nodemon services/payment-service.js
-    volumes:
-        - ./services/payment-service.js:/src/services/payment-service.js
-    depends_on:
-      - db
+#  payment-service:
+#    container_name: cotejs_payment_service
+#    extends: base
+#    command: nodemon services/payment-service.js
+#    volumes:
+#        - ./services/payment-service.js:/src/services/payment-service.js
+#    depends_on:
+#      - db
 
   product-service:
     container_name: cotejs_product_service
