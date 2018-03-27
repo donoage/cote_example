@@ -46,7 +46,7 @@
                     <strong>{{ user.name | capitalize}}</strong>
                     <small>@{{ user.name | truncate }}</small>
                     <br>
-                    Welcome Back!
+                    <span>Your Balance: {{ user.balance | capitalize}}</span>
                 </p>
             </div>
         </div>
@@ -127,25 +127,20 @@
         methods: {
             listProducts() {
                 this.$http.get('/products').then(res => {
-                    console.log(res);
                     this.products = res.body;
                 }, res => {
                     //TODO:Error
                 });
             },
             listUserPurchases() {
-                userService.emit('get', {userId: this.user._id}, (data) => {
-                    this.user.purchases = data.user.purchases;
+                this.$http.get(`/user/${this.user._id}`).then(res => {
+                    this.user.name = res.body.name;
+                    this.user.balance = res.body.balance;
+                }, res => {
+                    //TODO:Error
                 });
             },
-            getLatestPurchase(purchase) {
-                let productName;
 
-                productService.emit('get', {productId: purchase.productId}, (data) => {
-                    productName = data.product.name;
-                    this.user.purchases.push({productName: productName});
-                });
-            },
             createUser() {
                 this.$http.get('https://randomuser.me/api').then(res => {
                     let firstName = this.$options.filters.capitalize(res.body.results[0].name.first);
@@ -158,6 +153,8 @@
                         this.user.name = res.body.name;
                         this.user.pic_url = res.body.pic_url;
                         this.user._id = res.body._id;
+
+                        this.listUserPurchases();
                     });
                 }, res => {
                     //TODO:Error
@@ -165,21 +162,17 @@
             },
             purchaseProduct(productId) {
                 this.$http.post('/buy', {userId: this.user._id, productId: productId}).then(res => {
-                    console.log(res);
+                    this.user.purchases.push({productName: res.body.createPurchase.productName})
+                }, res => {
+                    this.errors = res.body.errors;
                 });
-                // purchaseService.emit('buy', {userId: this.user._id, productId: productId}, (data) => {
-                //     if (data.errors) {
-                //         this.errors = data.errors;
-                //         return;
-                //     }
-                //     this.getLatestPurchase(data.createPurchase);
-                //     this.listProducts();
-                // });
             }
         }
     });
 
     productService.on('update', app.listProducts);
+    userService.on('update', app.listUserPurchases);
+    purchaseService.on('update', app.listUserPurchases);
 </script>
 </body>
 </html>

@@ -32,6 +32,28 @@ app.get('/products', function (req, res) {
     });
 });
 
+app.get('/user/:id', function (req, res) {
+    const query = `
+            query($id: String!) {
+                user(_id: $id) {
+                    _id
+                    balance
+                    name
+                    pic_url
+                    purchases {
+                        userId
+                        productId
+                    }
+                }
+            }
+            `;
+    const variables = {id: req.params.id};
+    fetch({query, variables}).then(result => {
+        if (result.errors) res.status(500).send(result.errors.message);
+        res.send(result.data.user);
+    });
+});
+
 app.post('/create', function (req, res) {
     const query = `
     mutation createUserMutation($balance: Int!, $name: String!, $pic_url: String!) {
@@ -61,7 +83,6 @@ app.post('/create', function (req, res) {
 });
 
 app.post('/buy', function (req, res) {
-    console.log('1. BUY ----', req.body);
     // get the product and check stock
     const query = `
        query($id: String!) {
@@ -75,10 +96,7 @@ app.post('/buy', function (req, res) {
     const variables = {id: req.body.productId};
     fetch({query, variables}).then(result => {
         let product = result.data.product;
-        if (product.stock === 0) return res.send({errors: 'No More Product Left.'});
-
-        console.log('2. BUY ----', product);
-
+        if (product.stock === 0) return res.status(500).send({errors: 'No More Product Left.'});
         // get the user and check balance
         const query = `
             query($id: String!) {
@@ -92,9 +110,8 @@ app.post('/buy', function (req, res) {
             `;
         const variables = {id: req.body.userId};
         fetch({query, variables}).then(result => {
-            console.log('3. BUY ----', result);
             let user = result.data.user;
-            if (user.balance < product.price) return res.send({errors: 'Not Enough Balance.'});
+            if (user.balance < product.price) return res.status(500).send({errors: 'Not Enough Balance.'});
             user.balance -= product.price;
 
             // update user balance
@@ -112,6 +129,7 @@ app.post('/buy', function (req, res) {
             };
 
             fetch({query, variables}).then(result => {
+                if (result.errors) return res.status(500).send(result.errors);
                 product.stock--;
                 // update the product stock
                 const query = `
@@ -126,7 +144,7 @@ app.post('/buy', function (req, res) {
                     stock: product.stock,
                 };
                 fetch({query, variables}).then(result => {
-                    console.log('4. BUY ----', result);
+                    if (result.errors) return res.status(500).send(result.errors);
                     const query = `
                     mutation createPurchaseMutation($userId: String!, $productId: String!) {
                         createPurchase(userId: $userId, productId: $productId) {
@@ -140,35 +158,13 @@ app.post('/buy', function (req, res) {
                         productId: req.body.productId,
                     };
                     fetch({query, variables}).then(result => {
-                        console.log('4. BUY ----', result);
-                        // updatePurchases();
+                        result.data.createPurchase.productName = product.name;
                         res.send(result.data);
                     });
                 });
             });
         });
     });
-    //
-    //
-    // paymentRequester.send({type: 'process', userId: req.userId, price: product.price}, (res) => {
-    //     if (res.errors) return cb(res);
-    //     product.stock--;
-    //     // update the product stock
-    //     const query = `
-    //             mutation updateProductStockMutation($id: String!, $stock: Int!) {
-    //                 updateProductStock(_id: $id, stock: $stock) {
-    //                     _id
-    //                     stock
-    //                 }
-    //             }`;
-    //     const variables = {
-    //         id: product._id,
-    //         stock: product.stock,
-    //     };
-    //     fetch({query, variables}).then(res => {
-    //
-    //     });
-    // });
 });
 
 server.on('error', function (e) {

@@ -12,7 +12,7 @@ const prepare = (o) => {
 let productResponder = new cote.Responder({
     name: 'product responder',
     namespace: 'product',
-    respondsTo: ['list', 'create', 'get']
+    respondsTo: ['list', 'create', 'get', 'updateStock', 'delete']
 });
 
 let productPublisher = new cote.Publisher({
@@ -20,6 +20,7 @@ let productPublisher = new cote.Publisher({
     namespace: 'product',
     broadcasts: ['update']
 });
+
 MongoClient.connect(MONGO_URL, (err, client) => {
     const db = client.db('sbae_cote_example');
     const Products = db.collection('products');
@@ -34,36 +35,28 @@ MongoClient.connect(MONGO_URL, (err, client) => {
     });
 
     productResponder.on('create', async (req, cb) => {
-        const res = await Products.insertOne(args);
+        const res = await Products.insertOne(req.args);
         cb(prepare(await Products.findOne({_id: res.insertedId})));
+        updateProducts();
     });
 
     productResponder.on('updateStock', async (req, cb) => {
-        let filter = {_id: ObjectId(req.product._id)};
-        let balance = {$set: {stock: req.product.stock}};
-
+        let filter = {_id: ObjectId(req.args._id)};
+        let balance = {$set: {stock: req.args.stock}};
         cb(await Products.findOneAndUpdate(filter, balance));
+        updateProducts();
     });
 
     productResponder.on('delete', async (req, cb) => {
-        req._id = ObjectId(req._id);
-        cb(await Products.deleteOne(req));
+        const _id = ObjectId(req.args._id);
+        cb(await Products.deleteOne({_id: _id}));
+        updateProducts();
     });
 
+    async function updateProducts() {
+        productPublisher.publish('update', (await Products.find({}).toArray()).map(prepare));
+    }
 });
 
 
-function updateProducts() {
-    fetch({
-        query: `{ 
-                  products {
-                    _id 
-                    name
-                    price
-                    stock
-                  }
-                }`,
-    }).then(res => {
-        productPublisher.publish('update', res.data)
-    });
-}
+

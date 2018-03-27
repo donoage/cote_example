@@ -90,19 +90,17 @@ const resolvers = {
         },
         createProduct: async (root, args) => {
             return new Promise((resolve, reject) => {
-                productRequester.send({type: 'create', product: args}, function (product) {
+                productRequester.send({type: 'create', args: args}, function (product) {
                     if (product.errors) {
                         return reject(product.errors);
                     }
                     return resolve(product);
                 });
-
             });
-
         },
         updateProductStock: async (root, args) => {
             return new Promise((resolve, reject) => {
-                productRequester.send({type: 'updateStock', product: args}, function (product) {
+                productRequester.send({type: 'updateStock', args: args}, function (product) {
                     if (product.errors) {
                         return reject(product.errors);
                     }

@@ -182,47 +182,38 @@
             }
         },
         mounted() {
-            this.listUsers();
-            // this.listProducts();
-            // this.listPurchases();
+            this.listAllResources();
         },
         methods: {
+            listAllResources() {
+                this.$http.get('/allresources').then(res => {
+                    this.users = res.body.users;
+                    this.products = res.body.products;
+
+                    _.forEach(res.body.purchases, (purchase) => {
+                        this.addPurchaseInfoAndPush(purchase);
+                    });
+                }, res => {
+                });
+            },
+            addPurchaseInfoAndPush(purchase) {
+                this.$http.post('/purchase_info', {
+                    productId: purchase.productId,
+                    userId: purchase.userId
+                }).then(res => {
+                    this.purchases.push({userName: res.body.userName, productName: res.body.productName});
+                });
+            },
             listUsers() {
-                userService.emit('list', (users) => {
-                    this.users = users;
+                this.$http.get('/users').then(res => {
+                    this.users = res.body.users;
+                }, res => {
                 });
             },
             listProducts() {
-                productService.emit('list', (data) => {
-                    this.products = data.products;
-                });
-            },
-            listPurchases() {
-                purchaseService.emit('list', (data) => {
-                    _.forEach(data.purchases, (purchase) => {
-                        let userName;
-                        let productName;
-
-                        userService.emit('get', {userId: purchase.userId}, (data) => {
-                            userName = data.user.name;
-                            productService.emit('get', {productId: purchase.productId}, (data) => {
-                                productName = data.product.name;
-                                this.purchases.push({userName: userName, productName: productName});
-                            });
-                        });
-                    });
-                });
-            },
-            getLatestPurchase(purchase) {
-                let userName;
-                let productName;
-
-                userService.emit('get', {userId: purchase.userId}, (data) => {
-                    userName = data.user.name;
-                    productService.emit('get', {productId: purchase.productId}, (data) => {
-                        productName = data.product.name;
-                        this.purchases.push({userName: userName, productName: productName});
-                    });
+                this.$http.get('/products').then(res => {
+                    this.products = res.body.products;
+                }, res => {
                 });
             },
             checkForm(e) {
@@ -241,21 +232,11 @@
                     this.newProduct.price = formData.newProductPrice.value;
                     this.newProduct.stock = formData.newProductStock.value;
 
-                    productService.emit('create', {product: this.newProduct}, (data, err) => {
-                        if (!data.errors) {
-                            this.errors = {
-                                name: '',
-                                price: '',
-                                stock: '',
-                            };
-
-                            this.products = data.products;
-                            formData.newProductName.value = '';
-                            formData.newProductPrice.value = '';
-                            formData.newProductStock.value = '';
-                        } else {
-                            //TODO:Error checking
-                        }
+                    this.$http.post('/product', {product: this.newProduct}).then(data => {
+                        this.products.push(data.body.data.createProduct);
+                        formData.newProductName.value = '';
+                        formData.newProductPrice.value = '';
+                        formData.newProductStock.value = '';
                     });
                 }
 
@@ -275,11 +256,10 @@
 
     userService.on('update', app.listUsers);
     productService.on('update', app.listProducts);
-    purchaseService.on('update', (data) => {
+    purchaseService.on('update', (purchases) => {
         app.listProducts();
-
-        let lastPurchase = data.purchases[data.purchases.length - 1];
-        app.getLatestPurchase(lastPurchase);
+        let lastPurchase = purchases[purchases.length - 1];
+        app.addPurchaseInfoAndPush(lastPurchase);
     });
 </script>
 </body>

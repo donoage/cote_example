@@ -38,37 +38,17 @@ MongoClient.connect(MONGO_URL, (err, client) => {
 
     });
 
-    purchaseResponder.on('list', function (req, cb) {
-        fetch({
-            query: `{ 
-                  purchases {
-                    _id
-                    userId
-                    productId 
-                  }
-                }`,
-        }).then(res => {
-            cb(res.data);
-        });
+    purchaseResponder.on('list', async (req, cb) => {
+        cb((await Purchases.find({}).toArray()).map(prepare));
     });
 
     purchaseResponder.on('create', async (req, cb) => {
         const res = await Purchases.insertOne(req.args);
         cb(prepare(await Purchases.findOne({_id: res.insertedId})));
+        updatePurchases();
     });
+
+    async function updatePurchases() {
+        purchasePublisher.publish('update', (await Purchases.find({}).toArray()).map(prepare));
+    }
 });
-
-
-function updatePurchases() {
-    fetch({
-        query: `{ 
-                  purchases {
-                    _id
-                    userId
-                    productId 
-                  }
-                }`,
-    }).then(res => {
-        purchasePublisher.publish('update', res.data)
-    });
-}

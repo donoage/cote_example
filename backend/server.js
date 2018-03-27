@@ -20,7 +20,7 @@ app.all('*', function (req, res, next) {
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
-app.get('/start', function (req, res) {
+app.get('/allresources', function (req, res) {
     fetch({
         query: `{
               products {
@@ -46,8 +46,22 @@ app.get('/start', function (req, res) {
     });
 });
 
+app.get('/users', function (req, res) {
+    fetch({
+        query: `{
+          users {
+            _id
+            name
+            balance
+            pic_url
+          }
+        }`,
+    }).then(response => {
+        res.send(response.data);
+    });
+});
 
-app.get('/user', function (req, res) {
+app.get('/products', function (req, res) {
     fetch({
         query: `{
           products {
@@ -56,26 +70,43 @@ app.get('/user', function (req, res) {
             price
             stock
           }
-          users {
-            _id
-            name
-            balance
-            pic_url
-          }
-          purchases {
-            _id
-            userId
-            productId
-          }
         }`,
     }).then(response => {
         res.send(response.data);
     });
 });
 
-app.get('/product', function (req, res) {
-    productRequester.send({type: 'list'}, function (products) {
-        res.send(products);
+app.post('/purchase_info', function (req, res) {
+    // product
+    const query = `
+       query($productId: String!) {
+            product(_id: $productId) {
+                _id 
+                name
+                price
+                stock
+            }
+        }`;
+    const variables = {productId: req.body.productId};
+    fetch({query, variables}).then(result => {
+        if (result.errors) res.status(500).send(result.errors);
+        const product = result.data.product;
+        // user
+        const query = `
+           query($userId: String!) {
+                user(_id: $userId) {
+                    _id 
+                    name
+                    balance
+                }
+            }`;
+        const variables = {userId: req.body.userId};
+        fetch({query, variables}).then(result => {
+            if (result.errors) res.status(500).send(result.errors);
+            const user = result.data.user;
+
+            res.send({userName: user.name, productName: product.name});
+        });
     });
 });
 
@@ -91,16 +122,16 @@ app.post('/product', function (req, res) {
             }`;
 
     const variables = {
-        name: req.product.name,
-        price: req.product.price,
-        stock: req.product.stock,
+        name: req.body.product.name,
+        price: req.body.product.price,
+        stock: req.body.product.stock,
     };
 
     fetch({
         query, variables
-    }).then(res => {
-        updateProducts();
-        res.send(res);
+    }).then(result => {
+        if (result.errors) res.status(500).send(result.errors);
+        res.send(result);
     });
 });
 
@@ -113,37 +144,15 @@ app.delete('/product/:id', function (req, res) {
     }
     `;
     const variables = {
-        id: req.id
+        id: req.params.id
     };
 
     fetch({
         query, variables
-    }).then(response => {
-        updateProducts();
-        res.send(response);
+    }).then(result => {
+        if (result.errors) res.status(500).send(result.errors);
+        res.send(result);
     });
-});
-
-
-app.get('/purchase', function (req, res) {
-    purchaseRequester.send({type: 'list'}, function (purchases) {
-        res.send(purchases);
-    });
-});
-
-let productRequester = new cote.Requester({
-    name: 'admin product requester',
-    namespace: 'product'
-});
-
-let userRequester = new cote.Requester({
-    name: 'admin user requester',
-    namespace: 'user'
-});
-
-let purchaseRequester = new cote.Requester({
-    name: 'admin purchase requester',
-    namespace: 'purchase'
 });
 
 server.on('error', function (e) {
