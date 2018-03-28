@@ -1,15 +1,4 @@
 const typeDefs = [`
-  type Query {
-    user(_id: String): User
-    users: [User]
-    
-    product(_id: String): Product
-    products: [Product]
-    
-    purchase(_id: String): Purchase
-    purchases: [Purchase]
-  }
-
   type User {
     _id: String
     name: String
@@ -33,7 +22,18 @@ const typeDefs = [`
     product: Product
     user: User
   }
-
+  
+  type Query {
+    user(_id: String): User
+    users: [User]
+    
+    product(_id: String): Product
+    products: [Product]
+    
+    purchase(_id: String): Purchase
+    purchases: [Purchase]
+  }
+  
   type Mutation {
     createUser(balance: Int, name: String, pic_url: String): User
     updateUserBalance(_id: String, balance: Int): User
@@ -44,10 +44,15 @@ const typeDefs = [`
     
     createPurchase(userId: String, productId: String): Purchase
   }
+  
+  type Subscription {
+    userCreated: User
+  }
 
   schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
   }
 `];
 

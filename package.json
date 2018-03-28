@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm run microservices | npm run client",
+    "microservices": "pm2 start ecommerce_app.json",
+    "client": "cd vue_frontend && npm run serve",
     "postinstall": "cd backend && npm install && cd ../frontend && npm install && cd ../graphql && npm install && cd ../services && npm install"
   },
   "repository": {
@@ -16,5 +19,16 @@
   "bugs": {
     "url": "https://github.com/donoage/cote_example/issues"
   },
-  "homepage": "https://github.com/donoage/cote_example#readme"
+  "homepage": "https://github.com/donoage/cote_example#readme",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": "airbnb"
+  }
 }
