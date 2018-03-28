@@ -1,0 +1,20 @@
+{
+  "name": "ecommerce-main",
+  "version": "1.0.0",
+  "description": "ecommerce-main",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install && cd ../graphql && npm install && cd ../services && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/donoage/cote_example.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/donoage/cote_example/issues"
+  },
+  "homepage": "https://github.com/donoage/cote_example#readme"
+}
