@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run microservices | npm run client",
+    "dev": "npm run microservices | npm run admin",
     "microservices": "pm2 start ecommerce_app.json",
-    "client": "cd vue_frontend && npm run serve",
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install && cd ../graphql && npm install && cd ../services && npm install"
+    "admin": "cd app-admin && npm run serve",
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install && cd ../graphql && npm install && cd ../services && npm install && cd ../app-admin && npm install"
   },
   "repository": {
     "type": "git",
