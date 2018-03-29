@@ -26,7 +26,6 @@ const schema = makeExecutableSchema({
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
-
 app.use(HOME_PATH, graphiqlExpress({
   endpointURL: '/graphql',
 }));

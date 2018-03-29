@@ -8,7 +8,6 @@ import { getMainDefinition } from 'apollo-utilities';
 
 export default function createApolloClient({ endpoints }) {
   const httpLink = new HttpLink({ uri: endpoints.graphql });
-
   const wsLink = new WebSocketLink({
     uri: endpoints.subscription,
     options: {

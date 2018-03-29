@@ -1,8 +1,12 @@
 const cote = require('cote');
+
 const { PubSub, withFilter } = require('graphql-subscriptions');
 
 const pubsub = new PubSub();
 const USER_CREATED = 'user_created';
+const PRODUCT_CREATED = 'product_created';
+const PRODUCT_DELETED = 'product_deleted';
+const PURCHASE_CREATED = 'purchase_created';
 
 const userRequester = new cote.Requester({
   name: 'graphqlUserRequester',
@@ -46,7 +50,6 @@ const resolvers = {
         if (user.errors) {
           return reject(user.errors);
         }
-        console.log('user', user);
         pubsub.publish(USER_CREATED, { userCreated: user });
         return resolve(user);
       });
@@ -64,6 +67,7 @@ const resolvers = {
         if (product.errors) {
           return reject(product.errors);
         }
+        pubsub.publish(PRODUCT_CREATED, { productCreated: product });
         return resolve(product);
       });
     }),
@@ -80,6 +84,8 @@ const resolvers = {
         if (product.errors) {
           return reject(product.errors);
         }
+        console.log('DELETE----', product);
+        pubsub.publish(PRODUCT_DELETED, { productDeleted: product.value });
         return resolve(product);
       });
     }),
@@ -88,6 +94,7 @@ const resolvers = {
         if (purchase.errors) {
           return reject(purchase.errors);
         }
+        pubsub.publish(PURCHASE_CREATED, { purchaseCreated: purchase });
         return resolve(purchase);
       });
     }),
@@ -95,6 +102,15 @@ const resolvers = {
   Subscription: {
     userCreated: {
       subscribe: () => pubsub.asyncIterator(USER_CREATED),
+    },
+    productCreated: {
+      subscribe: () => pubsub.asyncIterator(PRODUCT_CREATED),
+    },
+    productDeleted: {
+      subscribe: () => pubsub.asyncIterator(PRODUCT_DELETED),
+    },
+    purchaseCreated: {
+      subscribe: () => pubsub.asyncIterator(PURCHASE_CREATED),
     },
   },
   User: {

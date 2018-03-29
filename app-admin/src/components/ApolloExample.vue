@@ -19,7 +19,7 @@
         <div v-if="loading" class="loading apollo">Loading...</div>
 
         <!-- Error -->
-        <div v-else-if="error" class="error apollo">An error occured</div>
+        <div v-else-if="error" class="error apollo">An error occurred</div>
 
         <!-- Result -->
         <div v-else-if="data" class="result apollo">{{ data.hello }}</div>
@@ -63,24 +63,24 @@
 </template>
 
 <script>
-import MESSAGE_ADD_MUTATION from '../graphql/MessageAdd.gql'
+import MESSAGE_ADD_MUTATION from '../graphql/MessageAdd.gql';
 
 export default {
-  data () {
+  data() {
     return {
       name: 'Anne',
       newMessage: '',
-    }
+    };
   },
 
   computed: {
-    formValid () {
-      return this.newMessage
+    formValid() {
+      return this.newMessage;
     },
   },
 
   methods: {
-    sendMessage () {
+    sendMessage() {
       if (this.formValid) {
         this.$apollo.mutate({
           mutation: MESSAGE_ADD_MUTATION,
@@ -89,22 +89,22 @@ export default {
               text: this.newMessage,
             },
           },
-        })
+        });
 
-        this.newMessage = ''
+        this.newMessage = '';
       }
     },
 
-    onMessageAdded (previousResult, { subscriptionData }) {
+    onMessageAdded(previousResult, { subscriptionData }) {
       return {
         messages: [
           ...previousResult.messages,
           subscriptionData.data.messageAdded,
         ],
-      }
+      };
     },
   },
-}
+};
 </script>
 
 <style scoped>

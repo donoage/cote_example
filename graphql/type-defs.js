@@ -47,6 +47,9 @@ const typeDefs = [`
   
   type Subscription {
     userCreated: User
+    productCreated: Product
+    productDeleted: Product
+    purchaseCreated: Purchase
   }
 
   schema {
