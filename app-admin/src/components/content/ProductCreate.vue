@@ -51,12 +51,14 @@ export default {
   methods: {
     checkForm(e) {
       e.preventDefault();
+      this.resetErrors();
+
       if (this.newProduct.name && this.newProduct.price && this.newProduct.stock) {
         this.createProduct();
       } else {
-        if (!this.newProduct.name) this.$data.errors.name = 'Name required.';
-        if (!this.newProduct.price) this.$data.errors.price = 'Price required.';
-        if (!this.newProduct.stock) this.$data.errors.stock = 'Stock required.';
+        if (!this.newProduct.name.trim()) this.$data.errors.name = 'Name required.';
+        if (!this.newProduct.price.trim()) this.$data.errors.price = 'Price required.';
+        if (!this.newProduct.stock.trim()) this.$data.errors.stock = 'Stock required.';
       }
     },
     createProduct() {
@@ -76,6 +78,10 @@ export default {
     },
     resetData() {
       Object.assign(this.$data, this.$options.data.call(this));
+    },
+    resetErrors() {
+      const initialData = this.$options.data.call(this);
+      Object.assign(this.$data.errors, initialData.errors);
     },
   },
   data() {
