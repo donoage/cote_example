@@ -1,7 +1,10 @@
 <template>
     <div class="tile is-parent is-vertical">
         <article class="tile is-child box">
-            <p class="title">Purchase</p>
+            <p class="title">
+                Purchase
+                <i class="fas fa-shopping-cart fas is-pulled-right"></i>
+            </p>
             <p class="subtitle">History</p>
             <div class="content">
                 <ApolloQuery :query="require('../../graphql/Purchases.gql')">

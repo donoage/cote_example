@@ -1,7 +1,10 @@
 <template>
     <div class="tile is-parent is-vertical">
         <article class="tile is-child box">
-            <p class="title">Product</p>
+            <p class="title">
+                Product
+                <i class="fas fa-list fas is-pulled-right"></i>
+            </p>
             <p class="subtitle">Catalog</p>
             <div class="content">
                 <ApolloQuery :query="require('../../graphql/Products.gql')">
@@ -34,7 +37,8 @@
                                 <td>{{ product.price }}</td>
                                 <td>{{ product.stock }}</td>
                                 <td>
-                                    <button class="button" @click="deleteProduct(product)">
+                                    <button class="button is-small is-warning"
+                                            @click="deleteProduct(product)">
                                         Delete
                                     </button>
                                 </td>

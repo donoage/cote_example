@@ -1,6 +1,9 @@
 <template>
     <article class="tile is-child box">
-        <p class="title">User</p>
+        <p class="title">
+            User
+            <i class="fas fa-users fas is-pulled-right"></i>
+        </p>
         <p class="subtitle">List</p>
         <div class="content">
             <ApolloQuery :query="require('../../graphql/Users.gql')">

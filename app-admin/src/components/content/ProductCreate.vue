@@ -1,13 +1,16 @@
 <template>
     <div class="tile is-parent is-vertical">
         <article class="tile is-child box">
-            <p class="title">Create</p>
+            <p class="title">
+                Create
+                <i class="fas fa-plus fas is-pulled-right"></i>
+            </p>
             <p class="subtitle">Product</p>
             <div class="content">
                 <form @submit="checkForm">
                     <div class="field">
-                        <div class="control has-icons-left has-icons-right">
-                            <label class="label">Name</label>
+                        <label class="label">Name</label>
+                        <div class="control has-icons-left">
                             <input class="input" type="text" value="" v-model="newProduct.name">
                             <span class="icon is-small is-left">
                               <i class="fas fa-tag"></i>
@@ -16,8 +19,8 @@
                         <p class="help is-danger" v-if="errors.name.length">{{errors.name}}</p>
                     </div>
                     <div class="field">
-                        <div class="control has-icons-left has-icons-right">
-                            <label class="label">Price</label>
+                        <label class="label">Price</label>
+                        <div class="control has-icons-left">
                             <input class="input" type="text" value="" v-model="newProduct.price">
                             <span class="icon is-small is-left">
                               <i class="fas fa-dollar-sign"></i>
@@ -26,8 +29,8 @@
                         <p class="help is-danger" v-if="errors.price.length">{{errors.price}}</p>
                     </div>
                     <div class="field">
-                        <div class="control has-icons-left has-icons-right">
-                            <label class="label">Stock</label>
+                        <label class="label">Stock</label>
+                        <div class="control has-icons-left">
                             <input class="input" type="text" value="" v-model="newProduct.stock">
                             <span class="icon is-small is-left">
                               <i class="fas fa-sort-numeric-up"></i>
@@ -36,7 +39,7 @@
                         <p class="help is-danger" v-if="errors.stock.length">{{errors.stock}}</p>
                     </div>
                     <div class="field">
-                        <input type="submit" value="Submit" class="button">
+                        <input type="submit" value="Submit" class="button is-warning">
                     </div>
                 </form>
             </div>
