@@ -5,7 +5,7 @@
                 <ProductCreate/>
                 <ProductList/>
             </div>
-            <div class="tile is-parent">
+            <div class="tile">
                 <PurchaseList/>
             </div>
         </div>

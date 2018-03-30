@@ -84,9 +84,8 @@ const resolvers = {
         if (product.errors) {
           return reject(product.errors);
         }
-        console.log('DELETE----', product);
         pubsub.publish(PRODUCT_DELETED, { productDeleted: product.value });
-        return resolve(product);
+        return resolve(product.value);
       });
     }),
     createPurchase: async (root, args) => new Promise((resolve, reject) => {

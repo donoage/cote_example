@@ -29,6 +29,9 @@
   },
   "eslintConfig": {
     "root": true,
-    "extends": "airbnb"
+    "extends": "airbnb",
+    "rules": {
+      "no-underscore-dangle": "off"
+    }
   }
 }

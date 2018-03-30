@@ -9,10 +9,6 @@
                             :document="require('../../graphql/ProductCreated.gql')"
                             :update-query="onProductCreated"
                     />
-                    <ApolloSubscribeToMore
-                            :document="require('../../graphql/ProductDeleted.gql')"
-                            :update-query="onProductDeleted"
-                    />
                     <template slot-scope="{ result: { loading, error, data } }">
                         <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
@@ -56,9 +52,20 @@
 
 <script>
 import ProductDelete from '../../graphql/ProductDelete.gql';
+import getProducts from '../../graphql/Products.gql';
 
 export default {
   name: 'ProductList',
+  apollo: {
+    products: {
+      query: getProducts,
+    },
+  },
+  data() {
+    return {
+      products: [],
+    };
+  },
   methods: {
     onProductCreated(previousResult, { subscriptionData }) {
       return {
@@ -68,23 +75,16 @@ export default {
         ],
       };
     },
-    onProductDeleted(previousResult, { subscriptionData }) {
-      //TODO: start here.
-      console.log(previousResult);
-      console.log(subscriptionData);
-      let index = previousResult.products.indexOf(subscriptionData.data.productDeleted);
-      console.log('index---', index);
-      return {
-        products: [
-          ...previousResult.products,
-        ],
-      };
-    },
     deleteProduct(product) {
       this.$apollo.mutate({
         mutation: ProductDelete,
         variables: {
           id: product._id,
+        },
+        update: (store, { data: { deleteProduct } }) => {
+          const data = store.readQuery({ query: getProducts });
+          this.$lodash.remove(data.products, item => item._id === deleteProduct._id);
+          store.writeQuery({ query: getProducts, data });
         },
       }).then((data) => {
         console.log(data);
@@ -93,11 +93,7 @@ export default {
       });
     },
   },
-  data() {
-    return {
-      products: [],
-    };
-  },
+
 };
 </script>
 
