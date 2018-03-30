@@ -39,7 +39,8 @@
                         <p class="help is-danger" v-if="errors.stock.length">{{errors.stock}}</p>
                     </div>
                     <div class="field">
-                        <input type="submit" value="Submit" class="button is-warning">
+                        <input type="submit" value="Submit"
+                               class="button is-warning is-pulled-right">
                     </div>
                 </form>
             </div>

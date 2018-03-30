@@ -1,0 +1,8 @@
+ mutation createProductMutation($price: Int!, $stock: Int!, $name: String!) {
+    createProduct(price: $price, stock: $stock, name: $name) {
+        _id
+        name
+        price
+        stock
+    }
+}

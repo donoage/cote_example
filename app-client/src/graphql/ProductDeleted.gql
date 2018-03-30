@@ -1,0 +1,8 @@
+subscription productDeleted {
+  productDeleted {
+      _id
+      name
+      price
+      stock
+  }
+}
