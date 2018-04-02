@@ -7,35 +7,35 @@
             </p>
             <p class="subtitle">History</p>
             <div class="content">
-                <ApolloQuery :query="require('../../graphql/Purchases.gql')">
-                    <ApolloSubscribeToMore
-                            :document="require('../../graphql/PurchaseCreated.gql')"
-                            :update-query="onPurchaseCreated"
-                    />
-                    <template slot-scope="{ result: { loading, error, data } }">
-                        <!-- Loading -->
-                        <div v-if="loading" class="loading apollo">
-                            <img src="../../assets/loader.gif"/> Loading...
-                        </div>
-                        <!-- Error -->
-                        <div v-else-if="error" class="error apollo">An error occurred</div>
-                        <!-- Result -->
-                        <div class="content animated fadeInUp"
-                             v-else-if="data"
-                             v-for="purchase in data.purchases"
-                             :key="purchase._id"
-                        >
-                            <ul>
-                                <li>
-                                    <strong>{{ purchase.user.name }}</strong>
-                                    purchased
-                                    <strong>{{ purchase.product.name }}</strong>
-                                </li>
-                            </ul>
-                        </div>
-                        <div v-else class="no-result apollo">No result :(</div>
-                    </template>
-                </ApolloQuery>
+                <!--<ApolloQuery :query="require('../../graphql/Purchases.gql')">-->
+                    <!--<ApolloSubscribeToMore-->
+                            <!--:document="require('../../graphql/PurchaseCreated.gql')"-->
+                            <!--:update-query="onPurchaseCreated"-->
+                    <!--/>-->
+                    <!--<template slot-scope="{ result: { loading, error, data } }">-->
+                        <!--&lt;!&ndash; Loading &ndash;&gt;-->
+                        <!--<div v-if="loading" class="loading apollo">-->
+                            <!--<img src="../../assets/loader.gif"/> Loading...-->
+                        <!--</div>-->
+                        <!--&lt;!&ndash; Error &ndash;&gt;-->
+                        <!--<div v-else-if="error" class="error apollo">An error occurred</div>-->
+                        <!--&lt;!&ndash; Result &ndash;&gt;-->
+                        <!--<div class="content animated fadeInUp"-->
+                             <!--v-else-if="data"-->
+                             <!--v-for="purchase in data.purchases"-->
+                             <!--:key="purchase._id"-->
+                        <!--&gt;-->
+                            <!--<ul>-->
+                                <!--<li>-->
+                                    <!--<strong>{{ purchase.user.name }}</strong>-->
+                                    <!--purchased-->
+                                    <!--<strong>{{ purchase.product.name }}</strong>-->
+                                <!--</li>-->
+                            <!--</ul>-->
+                        <!--</div>-->
+                        <!--<div v-else class="no-result apollo">No result :(</div>-->
+                    <!--</template>-->
+                <!--</ApolloQuery>-->
             </div>
         </article>
     </div>

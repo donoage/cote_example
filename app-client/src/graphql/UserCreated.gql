@@ -3,6 +3,6 @@ subscription userCreated {
     _id
     name
     balance
-    pic_url
+    picUrl
   }
 }

@@ -1,5 +1,0 @@
-mutation deleteProductMutation($id: String!) {
-    deleteProduct(_id: $id) {
-        _id
-    }
-}

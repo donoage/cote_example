@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import ProductDelete from '../../graphql/ProductDelete.gql';
+import PurchaseCreate from '../../graphql/PurchaseCreate.gql';
 import getProducts from '../../graphql/Products.gql';
 
 export default {
@@ -75,7 +75,7 @@ export default {
     // TODO: start here
     purchaseProduct(product) {
       this.$apollo.mutate({
-        mutation: ProductDelete,
+        mutation: PurchaseCreate,
         variables: {
           id: product._id,
         },
