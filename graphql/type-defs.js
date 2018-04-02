@@ -4,7 +4,7 @@ const typeDefs = [`
     name: String
     balance: Int
     purchases: [Purchase]
-    pic_url: String
+    picUrl: String
   }
 
   type Product {
@@ -35,7 +35,7 @@ const typeDefs = [`
   }
   
   type Mutation {
-    createUser(balance: Int, name: String, pic_url: String): User
+    createUser(balance: Int, name: String, picUrl: String): User
     updateUserBalance(_id: String, balance: Int): User
     
     createProduct(price: Int, stock: Int, name: String): Product
@@ -47,8 +47,11 @@ const typeDefs = [`
   
   type Subscription {
     userCreated: User
+    
     productCreated: Product
+    productUpdated: Product
     productDeleted: Product
+    
     purchaseCreated: Purchase
   }
 

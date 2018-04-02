@@ -5,6 +5,7 @@ const { PubSub, withFilter } = require('graphql-subscriptions');
 const pubsub = new PubSub();
 const USER_CREATED = 'user_created';
 const PRODUCT_CREATED = 'product_created';
+const PRODUCT_UPDATED = 'product_updated';
 const PRODUCT_DELETED = 'product_deleted';
 const PURCHASE_CREATED = 'purchase_created';
 
@@ -76,6 +77,7 @@ const resolvers = {
         if (product.errors) {
           return reject(product.errors);
         }
+        pubsub.publish(PRODUCT_UPDATED, { productUpdated: product });
         return resolve(product);
       });
     }),
@@ -104,6 +106,9 @@ const resolvers = {
     },
     productCreated: {
       subscribe: () => pubsub.asyncIterator(PRODUCT_CREATED),
+    },
+    productUpdated: {
+      subscribe: () => pubsub.asyncIterator(PRODUCT_UPDATED),
     },
     productDeleted: {
       subscribe: () => pubsub.asyncIterator(PRODUCT_DELETED),
