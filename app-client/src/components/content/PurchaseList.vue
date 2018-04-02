@@ -7,57 +7,53 @@
             </p>
             <p class="subtitle">History</p>
             <div class="content">
-                <!--<ApolloQuery :query="require('../../graphql/Purchases.gql')">-->
-                    <!--<ApolloSubscribeToMore-->
-                            <!--:document="require('../../graphql/PurchaseCreated.gql')"-->
-                            <!--:update-query="onPurchaseCreated"-->
-                    <!--/>-->
-                    <!--<template slot-scope="{ result: { loading, error, data } }">-->
-                        <!--&lt;!&ndash; Loading &ndash;&gt;-->
-                        <!--<div v-if="loading" class="loading apollo">-->
-                            <!--<img src="../../assets/loader.gif"/> Loading...-->
-                        <!--</div>-->
-                        <!--&lt;!&ndash; Error &ndash;&gt;-->
-                        <!--<div v-else-if="error" class="error apollo">An error occurred</div>-->
-                        <!--&lt;!&ndash; Result &ndash;&gt;-->
-                        <!--<div class="content animated fadeInUp"-->
-                             <!--v-else-if="data"-->
-                             <!--v-for="purchase in data.purchases"-->
-                             <!--:key="purchase._id"-->
-                        <!--&gt;-->
-                            <!--<ul>-->
-                                <!--<li>-->
-                                    <!--<strong>{{ purchase.user.name }}</strong>-->
-                                    <!--purchased-->
-                                    <!--<strong>{{ purchase.product.name }}</strong>-->
-                                <!--</li>-->
-                            <!--</ul>-->
-                        <!--</div>-->
-                        <!--<div v-else class="no-result apollo">No result :(</div>-->
-                    <!--</template>-->
-                <!--</ApolloQuery>-->
+                {{currentUser}}
             </div>
         </article>
     </div>
+
 </template>
 
 <script>
+import User from '../../graphql/User.gql';
+import PurchaseCreated from '../../graphql/PurchaseCreated.gql';
+
 export default {
   name: 'PurchaseList',
-  methods: {
-    onPurchaseCreated(previousResult, { subscriptionData }) {
-      return {
-        purchases: [
-          ...previousResult.purchases,
-          subscriptionData.data.purchaseCreated,
-        ],
-      };
-    },
-  },
+  props: ['currentUser'],
   data() {
-    return {
-      purchases: [],
-    };
+    return {};
+  },
+  mounted() {
+    const self = this;
+    const observer = this.$apollo.subscribe({
+      query: PurchaseCreated,
+    });
+    observer.subscribe({
+      next(res) {
+        console.log(res);
+        if (res.data.purchaseCreated.userId === self.currentUser.id) {
+          console.log('I bought this');
+          self.$apollo.query({
+            query: User,
+            variables: {
+              id: self.currentUser.id,
+            },
+            update: (store, { data: { newTag } }) => {
+              debugger;
+              // Read the data from our cache for this query.
+              const data = store.readQuery({ query: TAGS_QUERY })
+              // Add our tag from the mutation to the end
+              data.tags.push(newTag)
+              // Write our data back to the cache.
+              store.writeQuery({ query: TAGS_QUERY, data })
+            },
+          }).then((userRes) => {
+            console.log(userRes.data);
+          });
+        }
+      },
+    });
   },
 };
 </script>

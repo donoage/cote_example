@@ -83,6 +83,8 @@ export default {
       };
     },
     onProductDeleted(previousResult, { subscriptionData }) {
+      console.log(previousResult);
+      console.log(subscriptionData);
       debugger;
       // const data = store.readQuery({ query: getProducts });
       // this.$lodash.remove(data.products, item => item._id === deleteProduct._id);

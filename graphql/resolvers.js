@@ -77,7 +77,7 @@ const resolvers = {
         if (product.errors) {
           return reject(product.errors);
         }
-        pubsub.publish(PRODUCT_UPDATED, { productUpdated: product });
+        pubsub.publish(PRODUCT_UPDATED, { productUpdated: product.value });
         return resolve(product);
       });
     }),
