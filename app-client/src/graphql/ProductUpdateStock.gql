@@ -1,0 +1,6 @@
+mutation updateProductStockMutation($id: String!, $stock: Int!) {
+                    updateProductStock(_id: $id, stock: $stock) {
+                        _id
+                        stock
+                    }
+                }

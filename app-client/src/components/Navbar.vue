@@ -5,15 +5,15 @@
                  alt=""
                  width="95">
         </div>
-        <div class="navbar-end" v-if="user">
-            <img :src="user.picUrl"
+        <div class="navbar-end" v-if="currentUser">
+            <img :src="currentUser.picUrl"
                  class="user_img" alt="Image" width="64" height="64">
             <div class="navbar-item">
                 <p>
-                    <strong>{{ user.name | capitalize}}</strong>
-                    <small>@{{ user.name | truncate }}</small>
+                    <strong>{{ currentUser.name | capitalize}}</strong>
+                    <small>@{{ currentUser.name | truncate }}</small>
                     <br>
-                    <span>Your Balance: {{ user.balance | capitalize}}</span>
+                    <span>Your Balance: {{ currentUser.balance | capitalize}}</span>
                 </p>
             </div>
         </div>
@@ -21,46 +21,9 @@
 </template>
 
 <script>
-import UserCreate from '../graphql/UserCreate.gql';
-
 export default {
   name: 'Navbar',
-  data() {
-    return {
-      user: {
-        id: '',
-        name: 'test',
-        balance: 0,
-        picUrl: '',
-      },
-      userLoading: 0,
-    };
-  },
-  created() {
-    this.$http.get('https://randomuser.me/api').then((res) => {
-      const firstName = this.$options.filters.capitalize(res.body.results[0].name.first);
-      const lastName = this.$options.filters.capitalize(res.body.results[0].name.last);
-      const fullName = `${firstName} ${lastName}`;
-      const picUrl = res.body.results[0].picture.thumbnail;
-
-      this.$apollo.mutate({
-        mutation: UserCreate,
-        variables: {
-          name: fullName,
-          balance: 100,
-          picUrl,
-        },
-      }).then((response) => {
-        this.user.name = response.data.createUser.name;
-        this.user.balance = response.data.createUser.balance;
-        this.user.picUrl = response.data.createUser.picUrl;
-      }).catch((error) => {
-        console.log(error);
-      });
-    }, (res) => {
-      console.log(res);
-    });
-  },
+  props: ['currentUser'],
   filters: {
     capitalize(value) {
       if (!value) return '';

@@ -1,0 +1,6 @@
+  mutation updateUserBalanceMutation($id: String!, $balance: Int!) {
+                    updateUserBalance(_id: $id, balance: $balance) {
+                        _id
+                        balance
+                    }
+                }

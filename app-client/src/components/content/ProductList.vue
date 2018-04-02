@@ -12,6 +12,10 @@
                             :document="require('../../graphql/ProductCreated.gql')"
                             :update-query="onProductCreated"
                     />
+                    <ApolloSubscribeToMore
+                            :document="require('../../graphql/ProductDeleted.gql')"
+                            :update-query="onProductDeleted"
+                    />
                     <template slot-scope="{ result: { loading, error, data } }">
                         <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
@@ -48,11 +52,16 @@
 </template>
 
 <script>
-import PurchaseCreate from '../../graphql/PurchaseCreate.gql';
 import getProducts from '../../graphql/Products.gql';
+import Product from '../../graphql/Product.gql';
+import ProductUpdateStock from '../../graphql/ProductUpdateStock.gql';
+import User from '../../graphql/User.gql';
+import UserUpdateBalance from '../../graphql/UserUpdateBalance.gql';
+import PurchaseCreate from '../../graphql/PurchaseCreate.gql';
 
 export default {
   name: 'ProductList',
+  props: ['currentUser'],
   apollo: {
     products: {
       query: getProducts,
@@ -61,6 +70,7 @@ export default {
   data() {
     return {
       products: [],
+      error: '',
     };
   },
   methods: {
@@ -72,22 +82,70 @@ export default {
         ],
       };
     },
-    // TODO: start here
-    purchaseProduct(product) {
-      this.$apollo.mutate({
-        mutation: PurchaseCreate,
+    onProductDeleted(previousResult, { subscriptionData }) {
+      debugger;
+      // const data = store.readQuery({ query: getProducts });
+      // this.$lodash.remove(data.products, item => item._id === deleteProduct._id);
+      // store.writeQuery({ query: getProducts, data });
+    },
+    purchaseProduct(productId) {
+      const self = this;
+      const { currentUser } = this;
+
+      this.$apollo.query({
+        query: Product,
         variables: {
-          id: product._id,
+          id: productId,
         },
-        update: (store, { data: { deleteProduct } }) => {
-          const data = store.readQuery({ query: getProducts });
-          this.$lodash.remove(data.products, item => item._id === deleteProduct._id);
-          store.writeQuery({ query: getProducts, data });
-        },
-      }).then((data) => {
-        console.log(data);
-      }).catch((error) => {
-        console.log(error);
+      }).then((productRes) => {
+        const { product } = productRes.data;
+
+        if (product.stock === 0) {
+          self.error = 'No More Product Left in Stock';
+          return;
+        }
+        self.$apollo.query({
+          query: User,
+          variables: {
+            id: currentUser.id,
+          },
+        }).then((userRes) => {
+          const { user } = userRes.data;
+
+          if (user.balance < product.price) {
+            self.error = 'Not Enough Balance';
+          }
+        });
+
+        self.$apollo.mutate({
+          mutation: ProductUpdateStock,
+          variables: {
+            id: productId,
+            stock: product.stock - 1,
+          },
+        }).then((productUpdateRes) => {
+          console.log(productUpdateRes);
+
+          self.$apollo.mutate({
+            mutation: UserUpdateBalance,
+            variables: {
+              id: currentUser.id,
+              balance: currentUser.balance - product.price,
+            },
+          }).then((userUpdateRes) => {
+            console.log(userUpdateRes);
+
+            self.$apollo.mutate({
+              mutation: PurchaseCreate,
+              variables: {
+                userId: currentUser.id,
+                productId: product._id,
+              },
+            }).then((purchaseCreateRes) => {
+              console.log(purchaseCreateRes);
+            });
+          });
+        });
       });
     },
   },

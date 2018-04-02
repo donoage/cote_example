@@ -2,12 +2,12 @@
     <section class="tile is-ancestor">
         <div class="tile is-vertical is-8">
             <div class="tile">
-                <ProductList/>
+                <ProductList :currentUser="currentUser"/>
             </div>
         </div>
         <div class="tile">
             <div class="tile">
-                <PurchaseList/>
+                <PurchaseList :currentUser="currentUser"/>
             </div>
         </div>
     </section>
@@ -23,6 +23,7 @@ export default {
     ProductList,
     PurchaseList,
   },
+  props: ['currentUser'],
 };
 </script>
 
