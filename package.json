@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run microservices | npm run admin",
+    "dev": "npm run microservices | npm run admin | npm run client",
     "microservices": "pm2 start ecommerce_app.json",
     "admin": "cd app-admin && npm run serve",
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install && cd ../graphql && npm install && cd ../services && npm install && cd ../app-admin && npm install"
+    "client": "cd app-client && npm run serve",
+    "postinstall": "cd app-admin && npm install && cd ../app-client && npm install && cd ../graphql && npm install && cd ../services && npm install"
   },
   "repository": {
     "type": "git",

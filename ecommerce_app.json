@@ -1,25 +1,10 @@
 {
   "apps": [
     {
-      "name": "backend-server",
-      "script": "backend/server.js",
-      "watch": "backend/server.js"
-    },
-    {
-      "name": "frontend-server",
-      "script": "frontend/server.js",
-      "watch": "frontend/server.js"
-    },
-    {
       "name": "graphql-server",
       "script": "graphql/server.js",
       "watch": "graphql/server.js"
     },
-//    {
-//      "name": "payment-service",
-//      "script": "services/payment-service.js",
-//      "watch": "services/payment-service.js"
-//    },
     {
       "name": "product-service",
       "script": "services/product-service.js",
