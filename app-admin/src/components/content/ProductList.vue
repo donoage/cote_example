@@ -12,14 +12,15 @@
                             :document="require('../../graphql/ProductCreated.gql')"
                             :update-query="onProductCreated"
                     />
+                    <ApolloSubscribeToMore
+                            :document="require('../../graphql/ProductUpdated.gql')"
+                            :update-query="onProductUpdated"
+                    />
                     <template slot-scope="{ result: { loading, error, data } }">
-                        <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
                             <img src="../../assets/loader.gif"/> Loading...
                         </div>
-                        <!-- Error -->
                         <div v-else-if="error" class="error apollo">An error occurred</div>
-                        <!-- Result -->
                         <table v-else-if="data" class="table is-fullwidth">
                             <thead>
                             <tr>
@@ -78,6 +79,10 @@ export default {
           subscriptionData.data.productCreated,
         ],
       };
+    },
+    onProductUpdated() {
+      const store = this.$apolloProvider.defaultClient;
+      store.readQuery({ query: getProducts });
     },
     deleteProduct(product) {
       this.$apollo.mutate({

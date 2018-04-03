@@ -21,13 +21,10 @@
                             :update-query="onProductUpdated"
                     />
                     <template slot-scope="{ result: { loading, error, data } }">
-                        <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
                             <img src="../../assets/loader.gif"/> Loading...
                         </div>
-                        <!-- Error -->
                         <div v-else-if="error" class="error apollo">An error occurred</div>
-                        <!-- Result -->
                         <div v-else-if="data" class="columns is-multiline is-mobile">
                             <div class="column is-one-third animated pulse"
                                  v-for="product in data.products"
@@ -46,7 +43,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- No result -->
                         <div v-else class="no-result apollo">No result :(</div>
                     </template>
                 </ApolloQuery>

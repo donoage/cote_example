@@ -11,6 +11,10 @@
                         :document="require('../../graphql/UserCreated.gql')"
                         :update-query="onUserCreated"
                 />
+                <ApolloSubscribeToMore
+                        :document="require('../../graphql/UserUpdated.gql')"
+                        :update-query="onUserUpdated"
+                />
                 <template slot-scope="{ result: { loading, error, data } }">
                     <!-- Loading -->
                     <div v-if="loading" class="loading apollo">
@@ -44,6 +48,8 @@
 </template>
 
 <script>
+import Users from '../../graphql/Users.gql';
+
 export default {
   name: 'UserList',
   methods: {
@@ -54,6 +60,10 @@ export default {
           subscriptionData.data.userCreated,
         ],
       };
+    },
+    onUserUpdated() {
+      const store = this.$apolloProvider.defaultClient;
+      store.readQuery({ query: Users });
     },
   },
   data() {

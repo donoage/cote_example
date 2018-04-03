@@ -1,0 +1,8 @@
+subscription productUpdated {
+  productUpdated {
+      _id
+      name
+      price
+      stock
+  }
+}

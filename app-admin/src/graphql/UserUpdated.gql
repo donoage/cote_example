@@ -1,0 +1,8 @@
+subscription userUpdated {
+  userUpdated {
+    _id
+    name
+    balance
+    picUrl
+  }
+}
