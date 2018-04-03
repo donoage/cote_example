@@ -36,10 +36,12 @@ MongoClient.connect(MONGO_URL, (err, client) => {
   purchaseResponder.on('list', async (req, cb) => {
     if (req.userId) {
       cb((await Purchases.find({ userId: req.userId }).toArray()).map(prepare));
+      return;
     }
 
     if (req.productId) {
       cb((await Purchases.find({ productId: req.productId }).toArray()).map(prepare));
+      return;
     }
 
     cb((await Purchases.find({}).toArray()).map(prepare));

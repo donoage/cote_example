@@ -83,9 +83,7 @@ export default {
       };
     },
     onProductDeleted(previousResult, { subscriptionData }) {
-      console.log(previousResult);
-      console.log(subscriptionData);
-      debugger;
+      console.log('FIXME: product deleted', subscriptionData);
       // const data = store.readQuery({ query: getProducts });
       // this.$lodash.remove(data.products, item => item._id === deleteProduct._id);
       // store.writeQuery({ query: getProducts, data });
@@ -125,26 +123,21 @@ export default {
             id: productId,
             stock: product.stock - 1,
           },
-        }).then((productUpdateRes) => {
-          console.log(productUpdateRes);
-
+        }).then(() => {
           self.$apollo.mutate({
             mutation: UserUpdateBalance,
             variables: {
               id: currentUser.id,
               balance: currentUser.balance - product.price,
             },
-          }).then((userUpdateRes) => {
-            console.log(userUpdateRes);
-
+          }).then(() => {
             self.$apollo.mutate({
               mutation: PurchaseCreate,
               variables: {
                 userId: currentUser.id,
                 productId: product._id,
               },
-            }).then((purchaseCreateRes) => {
-              console.log(purchaseCreateRes);
+            }).then(() => {
             });
           });
         });

@@ -41,8 +41,8 @@ const resolvers = {
     purchase: async (root, { _id }) => new Promise((resolve, reject) => {
       purchaseRequester.send({ type: 'get', _id }, purchase => resolve(purchase));
     }),
-    purchases: async () => new Promise((resolve, reject) => {
-      purchaseRequester.send({ type: 'list' }, purchases => resolve(purchases));
+    purchases: async (root, { userId }) => new Promise((resolve, reject) => {
+      purchaseRequester.send({ type: 'list', userId }, purchases => resolve(purchases));
     }),
   },
   Mutation: {

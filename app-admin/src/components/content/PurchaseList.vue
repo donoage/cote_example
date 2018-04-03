@@ -13,13 +13,10 @@
                             :update-query="onPurchaseCreated"
                     />
                     <template slot-scope="{ result: { loading, error, data } }">
-                        <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
                             <img src="../../assets/loader.gif"/> Loading...
                         </div>
-                        <!-- Error -->
                         <div v-else-if="error" class="error apollo">An error occurred</div>
-                        <!-- Result -->
                         <div class="content animated fadeInUp"
                              v-else-if="data"
                              v-for="purchase in data.purchases"

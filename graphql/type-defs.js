@@ -31,7 +31,7 @@ const typeDefs = [`
     products: [Product]
     
     purchase(_id: String): Purchase
-    purchases: [Purchase]
+    purchases(userId: String): [Purchase]
   }
   
   type Mutation {

@@ -7,7 +7,7 @@
         </div>
         <div class="tile">
             <div class="tile">
-                <PurchaseList :currentUser="currentUser"/>
+                <PurchaseList v-if="currentUser" :currentUser="currentUser"/>
             </div>
         </div>
     </section>
