@@ -47,6 +47,7 @@ const typeDefs = [`
   
   type Subscription {
     userCreated: User
+    userUpdated: User
     
     productCreated: Product
     productUpdated: Product

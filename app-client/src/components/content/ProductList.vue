@@ -16,6 +16,10 @@
                             :document="require('../../graphql/ProductDeleted.gql')"
                             :update-query="onProductDeleted"
                     />
+                    <ApolloSubscribeToMore
+                            :document="require('../../graphql/ProductUpdated.gql')"
+                            :update-query="onProductUpdated"
+                    />
                     <template slot-scope="{ result: { loading, error, data } }">
                         <!-- Loading -->
                         <div v-if="loading" class="loading apollo">
@@ -83,10 +87,17 @@ export default {
       };
     },
     onProductDeleted(previousResult, { subscriptionData }) {
-      console.log('FIXME: product deleted', subscriptionData);
-      // const data = store.readQuery({ query: getProducts });
-      // this.$lodash.remove(data.products, item => item._id === deleteProduct._id);
-      // store.writeQuery({ query: getProducts, data });
+      const store = this.$apolloProvider.defaultClient;
+      const data = store.readQuery({ query: getProducts });
+      this.$lodash.remove(
+        data.products,
+        item => item._id === subscriptionData.data.productDeleted._id,
+      );
+      store.writeQuery({ query: getProducts, data });
+    },
+    onProductUpdated() {
+      const store = this.$apolloProvider.defaultClient;
+      store.readQuery({ query: getProducts });
     },
     purchaseProduct(productId) {
       const self = this;
@@ -114,30 +125,31 @@ export default {
 
           if (user.balance < product.price) {
             self.error = 'Not Enough Balance';
+            return;
           }
-        });
 
-        self.$apollo.mutate({
-          mutation: ProductUpdateStock,
-          variables: {
-            id: productId,
-            stock: product.stock - 1,
-          },
-        }).then(() => {
           self.$apollo.mutate({
-            mutation: UserUpdateBalance,
+            mutation: ProductUpdateStock,
             variables: {
-              id: currentUser.id,
-              balance: currentUser.balance - product.price,
+              id: productId,
+              stock: product.stock - 1,
             },
           }).then(() => {
             self.$apollo.mutate({
-              mutation: PurchaseCreate,
+              mutation: UserUpdateBalance,
               variables: {
-                userId: currentUser.id,
-                productId: product._id,
+                id: user._id,
+                balance: user.balance - product.price,
               },
             }).then(() => {
+              self.$apollo.mutate({
+                mutation: PurchaseCreate,
+                variables: {
+                  userId: currentUser.id,
+                  productId: product._id,
+                },
+              }).then(() => {
+              });
             });
           });
         });

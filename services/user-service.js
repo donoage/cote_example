@@ -44,7 +44,7 @@ MongoClient.connect(MONGO_URL, (err, client) => {
   userResponder.on('updateBalance', async (req, cb) => {
     const filter = { _id: ObjectId(req.args._id) };
     const balance = { $set: { balance: req.args.balance } };
-    cb(await Users.findOneAndUpdate(filter, balance));
+    cb(await Users.findOneAndUpdate(filter, balance, { returnOriginal: false }));
     updateUsers();
   });
 });

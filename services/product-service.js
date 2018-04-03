@@ -46,7 +46,7 @@ MongoClient.connect(MONGO_URL, (err, client) => {
   productResponder.on('updateStock', async (req, cb) => {
     const filter = { _id: ObjectId(req.args._id) };
     const balance = { $set: { stock: req.args.stock } };
-    cb(await Products.findOneAndUpdate(filter, balance));
+    cb(await Products.findOneAndUpdate(filter, balance, { returnOriginal: false }));
     updateProducts();
   });
 

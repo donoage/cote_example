@@ -3,7 +3,7 @@
     <Navbar :currentUser="user"/>
     <Header/>
     <br>
-    <Main :currentUser="user"/>
+    <Main v-if="user" :currentUser="user"/>
   </div>
 </template>
 
