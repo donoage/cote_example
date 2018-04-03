@@ -1,0 +1,13 @@
+query($userId: String!) {
+  purchases(userId: $userId) {
+    _id
+    userId
+    productId
+          user{
+            name
+          }
+          product {
+            name
+          }
+  }
+}

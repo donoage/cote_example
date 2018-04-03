@@ -1,0 +1,8 @@
+subscription userCreated {
+  userCreated {
+    _id
+    name
+    balance
+    picUrl
+  }
+}

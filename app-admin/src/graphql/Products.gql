@@ -1,0 +1,8 @@
+query {
+  products {
+      _id
+      name
+      price
+      stock
+  }
+}

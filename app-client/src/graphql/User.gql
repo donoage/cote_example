@@ -1,0 +1,13 @@
+query($id: String!) {
+    user(_id: $id) {
+        _id
+        balance
+        name
+        picUrl
+        purchases {
+          _id
+          userId
+          productId
+        }
+    }
+}

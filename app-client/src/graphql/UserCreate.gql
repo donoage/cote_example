@@ -1,0 +1,8 @@
+mutation createUserMutation($balance: Int!, $name: String!, $picUrl: String!) {
+    createUser(balance: $balance, name: $name, picUrl: $picUrl) {
+        _id
+        balance
+        name
+        picUrl
+    }
+}

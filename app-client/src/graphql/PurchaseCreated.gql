@@ -1,0 +1,13 @@
+subscription purchaseCreated {
+  purchaseCreated {
+      _id
+      userId
+      productId
+      user{
+        name
+      }
+      product {
+        name
+      }
+  }
+}

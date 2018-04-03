@@ -1,0 +1,7 @@
+mutation createPurchaseMutation($userId: String!, $productId: String!) {
+                        createPurchase(userId: $userId, productId: $productId) {
+                            _id
+                            userId
+                            productId
+                        }
+                    }

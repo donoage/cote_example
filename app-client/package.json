@@ -1,0 +1,72 @@
+{
+  "name": "app-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --port 8091",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "inspect": "vue-cli-service inspect"
+  },
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.0.0",
+    "apollo-client": "^2.0.1",
+    "apollo-link": "^1.2.1",
+    "apollo-link-context": "^1.0.5",
+    "apollo-link-http": "^1.0.0",
+    "apollo-link-persisted-queries": "^0.1.0",
+    "apollo-link-ws": "^1.0.0",
+    "apollo-upload-client": "^7.0.0-alpha.4",
+    "apollo-utilities": "^1.0.1",
+    "bulma": "^0.6.2",
+    "cote": "^0.16.2",
+    "graphql": "^0.13.0",
+    "graphql-tag": "^2.5.0",
+    "lodash": "^4.17.5",
+    "node": "^9.9.0",
+    "subscriptions-transport-ws": "^0.9.5",
+    "vue": "^2.5.13",
+    "vue-apollo": "^3.0.0-alpha.1",
+    "vue-resource": "^1.5.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.0-beta.6",
+    "@vue/cli-plugin-eslint": "^3.0.0-beta.6",
+    "@vue/cli-service": "^3.0.0-beta.6",
+    "cross-env": "^5.1.4",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-graphql": "^1.5.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "vue-cli-plugin-apollo": "^0.6.1",
+    "vue-template-compiler": "^2.5.13"
+  },
+  "babel": {
+    "presets": [
+      "@vue/app"
+    ]
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended",
+      "airbnb"
+    ],
+    "rules": {
+      "no-underscore-dangle": "off"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}

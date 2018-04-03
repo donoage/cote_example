@@ -1,0 +1,8 @@
+subscription productCreated {
+  productCreated {
+      _id
+      name
+      price
+      stock
+  }
+}

@@ -1,0 +1,13 @@
+query {
+  purchases {
+      _id
+      userId
+      productId
+      user{
+        name
+      }
+      product {
+        name
+      }
+  }
+}
