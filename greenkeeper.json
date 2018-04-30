@@ -1,0 +1,13 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "app-admin/package.json",
+        "app-client/package.json",
+        "graphql/package.json",
+        "package.json",
+        "services/package.json"
+      ]
+    }
+  }
+}
